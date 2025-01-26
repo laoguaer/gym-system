@@ -49,7 +49,7 @@ export default {
   /** 点赞文章 */
   saveLikeArticle: id => request.get(`/article/like/${id}`, { needToken: true }),
 
-  chatWithBot(data) {
-    return axios.post('/api/chat', data)
-  },
+  /** ChatBot 对话 */
+  chatWithBot: (data = {}) => request.post('/chat', data),
+
 }

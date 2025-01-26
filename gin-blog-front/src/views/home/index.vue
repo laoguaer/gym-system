@@ -13,6 +13,7 @@ import WebsiteInfo from './components/WebsiteInfo.vue'
 import HomeBanner from './components/HomeBanner.vue'
 import Announcement from './components/Announcement.vue'
 import TalkingCarousel from './components/TalkingCarousel.vue'
+import ChatBot from './components/ChatBot.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 
 import api from '@/api'
@@ -76,8 +77,10 @@ function backTop() {
     <div class="grid grid-cols-12 gap-4">
       <!-- 左半部分 -->
       <div class="col-span-12 lg:col-span-9 space-y-5">
+        <!-- 聊天机器人 -->
+        <ChatBot />
         <!-- 说说轮播 -->
-        <TalkingCarousel />
+        <!-- <TalkingCarousel /> -->
         <!-- 文章列表 -->
         <div class="space-y-5">
           <ArticleCard v-for="(item, idx) in articleList" :key="item.id" :article="item" :idx="idx" />
