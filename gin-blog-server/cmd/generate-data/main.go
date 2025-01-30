@@ -101,6 +101,7 @@ func generateDefaultConfigs(db *gorm.DB) {
 		{Key: "article_cover", Value: "https://cdn.hahacode.cn/config/default_article_cover.png", Desc: "默认文章封面"},
 		{Key: "is_comment_review", Value: "true", Desc: "评论默认审核"},
 		{Key: "is_message_review", Value: "true", Desc: "留言默认审核"},
+		{Key: "api_key", Value: "123456789", Desc: "coze.apikey"},
 	}
 
 	for _, config := range configs {

@@ -50,3 +50,6 @@ Qiniu:
   SecretKey: ""
   UseHttps: false
   UseCdnDomains: false
+Coze:
+  Url: "https://api.coze.cn/v1/workflow/run"
+  WorkflowId: "7454209939809320995"

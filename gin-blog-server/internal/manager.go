@@ -28,7 +28,7 @@ var (
 	blogInfoAPI     handle.BlogInfo     // 博客设置
 	operationLogAPI handle.OperationLog // 操作日志
 	pageAPI         handle.Page         // 页面
-
+	chatAPI         handle.Chat         // 聊天
 	// 博客前台接口
 
 	frontAPI handle.Front // 博客前台接口汇总
@@ -56,7 +56,7 @@ func registerBaseHandler(r *gin.Engine) {
 	base.POST("/report", blogInfoAPI.Report)        // 上报信息
 	base.GET("/config", blogInfoAPI.GetConfigMap)   // 获取配置
 	base.PATCH("/config", blogInfoAPI.UpdateConfig) // 更新配置
-	base.GET("/email/verify",userAuthAPI.VerifyCode)
+	base.GET("/email/verify", userAuthAPI.VerifyCode)
 }
 
 // 后台管理系统的接口: 全部需要 登录 + 鉴权
@@ -216,6 +216,10 @@ func registerBlogHandler(r *gin.Engine) {
 	{
 		comment.GET("/list", frontAPI.GetCommentList)                         // 前台评论列表
 		comment.GET("/replies/:comment_id", frontAPI.GetReplyListByCommentId) // 根据评论 id 查询回复
+	}
+	chat := base.Group("/chat")
+	{
+		chat.POST("/send", chatAPI.Send) // 前台聊天列表
 	}
 
 	// 需要登录才能进行的操作
