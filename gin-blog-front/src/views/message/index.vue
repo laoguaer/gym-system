@@ -21,7 +21,7 @@ const isLoop = ref(false) // 循环播放
 const danmus = ref([{
   avatar: 'https://www.bing.com/rp/ar_9isCNU2Q-VG1yEDDHnx8HAFQ.png',
   content: '大家好，我是作者，欢迎给我点一颗 Star!',
-  nickname: '阵、雨',
+  nickname: '赵宇锋',
 }])
 
 onMounted(async () => {

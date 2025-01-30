@@ -8,6 +8,9 @@ const basicRoutes = [
     name: 'Home',
     path: '/',
     component: () => import('@/views/home/index.vue'),
+    meta: {
+      title: '首页',  
+    },
   },
   {
     name: 'Article',

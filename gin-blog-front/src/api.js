@@ -50,6 +50,15 @@ export default {
   saveLikeArticle: id => request.get(`/article/like/${id}`, { needToken: true }),
 
   /** ChatBot 对话 */
-  chatWithBot: (data = {}) => request.post('/chat', data),
+  chatWithBot: async (data) => {
+    try {
+      const response = await request.post('chat/send', data)
+      return response.data // 确保返回的是 response.data
+    }
+    catch (error) {
+      // 处理错误，确保返回有意义的信息
+      throw error.response ? error.response.data : error
+    }
+  },
 
 }

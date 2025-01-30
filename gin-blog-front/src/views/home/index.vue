@@ -18,8 +18,13 @@ import AppFooter from '@/components/layout/AppFooter.vue'
 
 import api from '@/api'
 
+import { useUserStore } from '@/store'
+
+// 假设你有一个用户状态管理的store
+
 const articleList = ref([])
 const loading = ref(false)
+const userStore = useUserStore() // 获取用户状态
 
 // 无限加载文章
 const params = reactive({ page_size: 5, page_num: 1 }) // 列表加载参数
@@ -110,11 +115,11 @@ function backTop() {
         <!-- sticky 实现悬浮固定效果 -->
         <div class="sticky top-5 space-y-5">
           <!-- 博主信息 -->
-          <AuthorInfo />
+          <AuthorInfo v-if="userStore.userId" />
           <!-- 公告 -->
-          <Announcement />
+          <!-- <Announcement /> -->
           <!-- 网站资讯 -->
-          <WebsiteInfo />
+          <!-- <WebsiteInfo /> -->
         </div>
       </div>
     </div>

@@ -1,42 +1,63 @@
 <script setup>
-import { nextTick, ref, watch } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
+import json from 'highlight.js/lib/languages/json'
 import api from '@/api'
+import { useAppStore, useUserStore } from '@/store'
 
 const messages = ref([])
 const userInput = ref('')
 const isSending = ref(false) // 用于跟踪是否正在发送消息
 const inputRef = ref(null) // 用于引用输入框
 
+const messageMap = {
+  login: '<button onclick="appStore.setLoginFlag(true)">登录</button>',
+  welcome: '欢迎来到聊天机器人！',
+  error: '抱歉，发生了错误，请稍后再试。',
+  // 添加更多消息类型
+}
+
+function getSystemMessage(key) {
+  return messageMap[key] || '未知消息类型' // 默认返回未知消息
+}
+
+const userStore = useUserStore() // 获取用户状态
 async function sendMessage() {
-  if (userInput.value.trim() === '' || isSending.value)
-    return
-
-  isSending.value = true // 开始发送消息
-
-  // 添加用户消息到聊天
-  messages.value.push({ type: 'user', text: userInput.value })
-
   try {
+    if (userInput.value.trim() === '' || isSending.value)
+      return
+    if (!userStore.userId) {
+    // 如果用户未登录, 发送一个系统的消息
+      messages.value.push({ type: 'bot', text: '使用客服功能请先点击下面按钮进行登录哦' })
+      messages.value.push({ type: 'system', text: getSystemMessage('login') })
+      return
+    }
+    const input = userInput.value
+    userInput.value = ''
+    isSending.value = true // 开始发送消息
+
+    // 添加用户消息到聊天
+    messages.value.push({ type: 'user', text: input })
+
     // 调用后端API
-    const response = await api.chatWithBot({ message: userInput.value })
+    const response = await api.chatWithBot({ chat_string: input })
+    console.log('API 响应:', response)
+    const resp = JSON.parse(response) // 确保这里的response是有效的JSON
+    const output = resp.data // 直接使用data字段
     // 添加机器人回复到聊天
-    messages.value.push({ type: 'bot', text: response.data.reply })
+    messages.value.push({ type: 'bot', text: output }) // 直接使用output
+    isSending.value = false // 消息发送完成
   }
   catch (error) {
     console.error('与机器人通信时出错:', error)
-    // 添加错误提示到聊天
-    messages.value.push({ type: 'bot', text: '抱歉，我遇到了一些问题，请稍后再试。' })
+    messages.value.push({ type: 'system', text: getSystemMessage('errorr') })
   }
-
-  // 清空输入框
-  userInput.value = ''
-  isSending.value = false // 消息发送完成
-
-  // 等待 DOM 更新后滚动到底部
-  await nextTick(() => {
-    scrollToBottom()
-    inputRef.value?.focus() // 重新聚焦到输入框
-  })
+  finally {
+    // 等待 DOM 更新后滚动到底部
+    await nextTick(() => {
+      scrollToBottom()
+      inputRef.value?.focus() // 重新聚焦到输入框
+    })
+  }
 }
 
 // 滚动到消息列表底部
@@ -55,7 +76,10 @@ function scrollToBottom() {
     </h2>
     <div class="messages">
       <div v-for="(message, index) in messages" :key="index" class="message" :class="[message.type]">
-        {{ message.text }}
+        <div v-if="message.type === 'system'" v-html="message.text" />
+        <div v-else>
+          {{ message.text }}
+        </div>
       </div>
     </div>
     <input ref="inputRef" v-model="userInput" class="input-field" placeholder="输入消息..." @keyup.enter="sendMessage">
@@ -85,7 +109,11 @@ function scrollToBottom() {
   padding: 5px; /* 消息内边距 */
   border-radius: 4px; /* 消息圆角 */
 }
-
+.system {
+  text-align: center;
+  color: rgb(59, 57, 57);
+  background-color: #408466; /* 用户消息背景色 */
+}
 .user {
   text-align: right;
   color: blue;

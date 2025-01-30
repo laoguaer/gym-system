@@ -22,6 +22,8 @@ onMounted(() => {
   // 挂载全局提示
   window.$message = messageRef.value
   window.$notify = notifyRef.value
+  window.appStore = appStore
+  window.userStore = userStore
 })
 
 // 禁止右键菜单

@@ -19,8 +19,8 @@ export const useAppStore = defineStore('app', {
       user_count: 0,
     },
     blog_config: {
-      website_name: '阵、雨的个人博客',
-      website_author: '阵、雨',
+      website_name: 'xxx健身房',
+      website_author: '赵宇锋',
       website_intro: '往事随风而去',
       website_avatar: '',
     },
