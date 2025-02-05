@@ -76,7 +76,9 @@ type Config struct {
 	}
 	Coze struct {
 		Url        string
+		BaseUrl    string
 		WorkflowId string
+		BotId      string
 	}
 }
 

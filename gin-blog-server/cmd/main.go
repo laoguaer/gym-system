@@ -28,11 +28,11 @@ func main() {
 	r.SetTrustedProxies([]string{"*"})
 	// 开发模式使用 gin 自带的日志和恢复中间件, 生产模式使用自定义的中间件
 	if conf.Server.Mode == "debug" {
-		r.Use(middleware.ShowResponse())    // 将 logPostRequestBody 放在 gin.Logger() 之后
 		r.Use(gin.Logger(), gin.Recovery()) // gin 自带的日志和恢复中间件, 挺好用的
+		r.Use(middleware.ShowResponse())    // 将 logPostRequestBody 放在 gin.Logger() 之后
 	} else {
-		r.Use(middleware.ShowResponse()) // 将 logPostRequestBody 放在自定义 Logger 之后
 		r.Use(middleware.Recovery(true), middleware.Logger())
+		r.Use(middleware.ShowResponse()) // 将 logPostRequestBody 放在自定义 Logger 之后
 	}
 	r.Use(middleware.CORS())
 	r.Use(middleware.WithGormDB(db))

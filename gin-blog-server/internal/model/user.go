@@ -9,11 +9,12 @@ import (
 
 type UserInfo struct {
 	Model
-	Email    string `json:"email" gorm:"type:varchar(30)"`
-	Nickname string `json:"nickname" gorm:"unique;type:varchar(30);not null"`
-	Avatar   string `json:"avatar" gorm:"type:varchar(1024);not null"`
-	Intro    string `json:"intro" gorm:"type:varchar(255)"`
-	Website  string `json:"website" gorm:"type:varchar(255)"`
+	Email              string `json:"email" gorm:"type:varchar(30)"`
+	Nickname           string `json:"nickname" gorm:"unique;type:varchar(30);not null"`
+	Avatar             string `json:"avatar" gorm:"type:varchar(1024);not null"`
+	Intro              string `json:"intro" gorm:"type:varchar(255)"`
+	Website            string `json:"website" gorm:"type:varchar(255)"`
+	CozeConversationId string `json:"coze_conversation_id" gorm:"type:varchar(255)"`
 }
 
 type UserInfoVO struct {
@@ -28,15 +29,15 @@ func GetUserInfoById(db *gorm.DB, id int) (*UserInfo, error) {
 	return &userInfo, result.Error
 }
 
-func GetUserAuthInfoByName(db *gorm.DB,name string) (*UserAuth,error){
+func GetUserAuthInfoByName(db *gorm.DB, name string) (*UserAuth, error) {
 	var userauth UserAuth
-	
-	result := db.Model(&userauth).Where("username LIKE ?",name).First(&userauth)
-	if result.Error != nil && errors.Is(result.Error,gorm.ErrRecordNotFound){
-		return nil,result.Error
+
+	result := db.Model(&userauth).Where("username LIKE ?", name).First(&userauth)
+	if result.Error != nil && errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, result.Error
 	}
-	
-	return &userauth,result.Error
+
+	return &userauth, result.Error
 }
 
 func GetUserList(db *gorm.DB, page, size int, loginType int8, nickname, username string) (list []UserAuth, total int64, err error) {
@@ -143,4 +144,20 @@ func UpdateUserLoginInfo(db *gorm.DB, id int, ipAddress, ipSource string) error 
 
 	result := db.Where("id", id).Updates(userAuth)
 	return result.Error
+}
+
+func NewOrGetConversationId(db *gorm.DB, userId int) (string, error) {
+	userInfo, err := GetUserInfoById(db, userId)
+	if err != nil {
+		return "", err
+	}
+	if userInfo.CozeConversationId == "" {
+		conversationId, err := NewCozeConversation(db)
+		if err != nil {
+			return "", err
+		}
+		userInfo.CozeConversationId = conversationId
+		db.Model(&userInfo).Updates(userInfo)
+	}
+	return userInfo.CozeConversationId, nil
 }

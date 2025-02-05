@@ -53,3 +53,5 @@ Qiniu:
 Coze:
   Url: "https://api.coze.cn/v1/workflow/run"
   WorkflowId: "7454209939809320995"
+  BaseUrl: "https://api.coze.cn"
+  BotId: "7452369603411918883"
