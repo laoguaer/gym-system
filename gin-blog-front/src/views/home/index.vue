@@ -9,6 +9,7 @@ import { marked } from 'marked'
 
 import ArticleCard from './components/ArticleCard.vue'
 import AuthorInfo from './components/AuthorInfo.vue'
+import UserInfo from './components/UserInfo.vue'
 import WebsiteInfo from './components/WebsiteInfo.vue'
 import HomeBanner from './components/HomeBanner.vue'
 import Announcement from './components/Announcement.vue'
@@ -115,7 +116,8 @@ function backTop() {
         <!-- sticky 实现悬浮固定效果 -->
         <div class="sticky top-5 space-y-5">
           <!-- 博主信息 -->
-          <AuthorInfo v-if="userStore.userId" />
+          <UserInfo v-if="userStore.userId" />
+          <AuthorInfo />
           <!-- 公告 -->
           <!-- <Announcement /> -->
           <!-- 网站资讯 -->
