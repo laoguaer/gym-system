@@ -29,27 +29,27 @@ const userStore = useUserStore() // 获取用户状态
 
 // 无限加载文章
 const params = reactive({ page_size: 5, page_num: 1 }) // 列表加载参数
-async function getArticlesInfinite($state) {
-  if (!loading.value) {
-    try {
-      const resp = await api.getArticles(params)
-      // 加载完成
-      if (!resp.data.length) {
-        $state.complete()
-        return
-      }
-      // 非首次加载, 都是往列表中添加数据
-      articleList.value.push(...resp.data)
-      // 过滤 Markdown 符号
-      articleList.value.forEach(e => e.content = filterMdSymbol(e.content))
-      params.page_num++
-      $state.loaded()
-    }
-    catch (error) {
-      $state.error()
-    }
-  }
-}
+// async function getArticlesInfinite($state) {
+//   if (!loading.value) {
+//     try {
+//       const resp = await api.getArticles(params)
+//       // 加载完成
+//       if (!resp.data.length) {
+//         $state.complete()
+//         return
+//       }
+//       // 非首次加载, 都是往列表中添加数据
+//       articleList.value.push(...resp.data)
+//       // 过滤 Markdown 符号
+//       articleList.value.forEach(e => e.content = filterMdSymbol(e.content))
+//       params.page_num++
+//       $state.loaded()
+//     }
+//     catch (error) {
+//       $state.error()
+//     }
+//   }
+// }
 
 onMounted(async () => {
   loading.value = true
@@ -70,31 +70,30 @@ function filterMdSymbol(md) {
     .replace(/&npsp;/gi, '')
 }
 
-function backTop() {
-  window.scrollTo({ behavior: 'smooth', top: 0 })
-}
+// function backTop() {
+//   window.scrollTo({ behavior: 'smooth', top: 0 })
+// }
 </script>
 
 <template>
   <!-- 首页封面图 -->
   <HomeBanner />
   <!-- 内容 -->
-  <div class="mx-auto mb-8 max-w-[1230px] flex flex-col justify-center px-3" style="margin-top: calc(100vh + 30px)">
+  <div class="mx-auto mb-8 max-w-[1230px] flex flex-col justify-center px-3">
     <div class="grid grid-cols-12 gap-4">
       <!-- 左半部分 -->
       <div class="col-span-12 lg:col-span-9 space-y-5">
         <!-- 聊天机器人 -->
-        <ChatBot />
+        <!-- <ChatBot /> -->
         <!-- 说说轮播 -->
         <!-- <TalkingCarousel /> -->
         <!-- 文章列表 -->
-        <div class="space-y-5">
+        <!-- <div class="space-y-5">
           <ArticleCard v-for="(item, idx) in articleList" :key="item.id" :article="item" :idx="idx" />
-        </div>
+        </div> -->
         <!-- 无限加载 -->
-        <div class="f-c-c">
+        <!-- <div class="f-c-c">
           <InfiniteLoading class="mt-2 lg:mt-5" @infinite="getArticlesInfinite">
-            <!-- TODO: 优化界面 -->
             <template #spinner>
               <span class="animate-pulse text-xl">
                 loading...
@@ -109,7 +108,7 @@ function backTop() {
               </span>
             </template>
           </InfiniteLoading>
-        </div>
+        </div> -->
       </div>
       <!-- 右半部分 -->
       <div class="col-span-0 lg:col-span-3">
@@ -117,7 +116,7 @@ function backTop() {
         <div class="sticky top-5 space-y-5">
           <!-- 博主信息 -->
           <UserInfo v-if="userStore.userId" />
-          <AuthorInfo />
+          <!-- <AuthorInfo /> -->
           <!-- 公告 -->
           <!-- <Announcement /> -->
           <!-- 网站资讯 -->
@@ -125,7 +124,7 @@ function backTop() {
         </div>
       </div>
     </div>
+    <AppFooter />
   </div>
   <!-- 底部 -->
-  <AppFooter />
 </template>

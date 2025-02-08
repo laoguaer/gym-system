@@ -17,24 +17,47 @@ const route = useRoute()
 const menuOptions = [
   { text: '首页', icon: 'mdi:home', path: '/' },
   {
-    text: '发现',
+    text: '教练团队',
     icon: 'mdi:apple-safari',
     subMenu: [
-      { text: '归档', icon: 'mdi:archive', path: '/archives' },
-      { text: '分类', icon: 'mdi:menu', path: '/categories' },
-      { text: '标签', icon: 'mdi:tag', path: '/tags' },
+      { text: '教练信息预览', icon: 'mdi:view-list', path: '/coachinfo' },
+      { text: '我的教练', icon: 'mdi:menu', path: '/mycoach' },
     ],
   },
   {
-    text: '娱乐',
+    text: '课程信息',
     icon: 'mdi:gamepad-circle',
     subMenu: [
-      { text: '相册', icon: 'mdi:view-gallery', path: '/albums' },
+      { text: '课程信息预览', icon: 'mdi:view-gallery', path: '/courseinfo' },
+      { text: '我的课程', icon: 'mdi:menu', path: '/mycourse' },
     ],
   },
-  { text: '友链', icon: 'mdi:vector-link', path: '/links' },
+  {
+    text: '健身用品',
+    icon: 'mdi:shopping',
+    subMenu: [
+      { text: '健身用品介绍', icon: 'mdi:view-list', path: '/products' },
+      { text: '健身用品分类', icon: 'mdi:menu', path: '/product-categories' },
+      { text: '我的健身用品', icon: 'mdi:menu', path: '/myproduct' },
+    ],
+  },
+  { 
+    text: '健身教学', 
+    icon: 'mdi:vector-link',
+    subMenu: [
+      { text: '健身文章', icon: 'mdi:view-list', path: '/gym-teaching' },
+      { text: '健身教学短片', icon: 'mdi:menu', path: '/my-gym-teaching' },
+    ],
+  },
+  {
+    text: '客户见证',
+    icon: 'mdi:comment-quote',
+    subMenu: [
+      { text: '会员感想', icon: 'mdi:view-list', path: '/customer-testimonials' },
+      { text: '发表感想', icon: 'mdi:menu', path: '/my-customer-testimonials' },
+    ],
+  },
   { text: '关于', icon: 'mdi:information-outline', path: '/about' },
-  { text: '留言', icon: 'mdi:forum', path: '/message' },
 ]
 
 const navClass = ref('nav')

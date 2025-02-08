@@ -25,21 +25,18 @@ function addToFavorites() {
     <!-- 博客信息 -->
     <div class="flex justify-center">
       <RouterLink to="/archives" class="flex-1">
-        <p>文章</p>
-        <p class="text-xl">
-          {{ articleCount }}
+        <p class="h-9 w-7/8 f-c-c transform rounded bg-blue-600 text-white transition-200 ease-in-out hover:scale-105 hover:bg-orange-600">
+          我的教练
         </p>
       </RouterLink>
       <RouterLink to="/categories" class="flex-1">
-        <p>分类</p>
-        <p class="text-xl">
-          {{ categoryCount }}
+        <p class="h-9 w-7/8 f-c-c transform rounded bg-blue-600 text-white transition-200 ease-in-out hover:scale-105 hover:bg-orange-600">
+          我的课程
         </p>
       </RouterLink>
       <RouterLink to="/tags" class="flex-1">
-        <p>标签</p>
-        <p class="text-xl">
-          {{ tagCount }}
+        <p class="h-9 w-7/8 f-c-c transform rounded bg-blue-600 text-white transition-200 ease-in-out hover:scale-105 hover:bg-orange-600">
+          个人信息
         </p>
       </RouterLink>
     </div>

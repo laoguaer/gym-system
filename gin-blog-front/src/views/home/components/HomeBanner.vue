@@ -41,6 +41,8 @@ function scrollDown() {
 // 根据后端配置动态获取封面
 const coverStyle = computed(() => {
   const page = pageList.value.find(e => e.label === 'home')
+  // return 'background: grey center center / cover no-repeat;'
+  console.log(page)
   return page
     ? `background: url('${page.cover}') center center / cover no-repeat;`
     : 'background: grey center center / cover no-repeat;'
@@ -48,7 +50,7 @@ const coverStyle = computed(() => {
 </script>
 
 <template>
-  <div class="banner-fade-down absolute bottom-0 left-0 right-0 h-screen text-center text-white" :style="coverStyle">
+  <div class="absolute inset-0 h-screen text-center text-white" :style="coverStyle">
     <div class="absolute inset-x-0 mt-[43vh] text-center space-y-3">
       <h1 class="animate-zoom-in text-4xl font-bold lg:text-5xl">
         {{ blogConfig.website_name }}
@@ -70,9 +72,8 @@ const coverStyle = computed(() => {
         </a>
       </div>
     </div>
-    <!-- 向下滚动 -->
-    <div class="absolute bottom-0 w-full cursor-pointer" @click="scrollDown">
+    <!-- <div class="absolute bottom-0 w-full cursor-pointer" @click="scrollDown">
       <span class="i-ep:arrow-down-bold inline-block animate-bounce text-2xl text-white" />
-    </div>
+    </div> -->
   </div>
 </template>
