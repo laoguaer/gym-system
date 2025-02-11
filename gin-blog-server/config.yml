@@ -9,7 +9,7 @@ JWT:
   Expire: 24 # hour
   Issuer: "gin-vue-blog"
 Mysql:
-  Host: "127.0.0.1"
+  Host: "160.202.224.52"
   Port: "3306"
   Config: "charset=utf8mb4&parseTime=True&loc=Local" # 其他配置, 例如时区
   Dbname: "gvb"
@@ -19,7 +19,7 @@ Sqlite:
   Dsn: "gvb.db"
 Redis:
   DB: 7
-  Addr: '127.0.0.1:6379'
+  Addr: '160.202.224.52:6379'
   Password: 'zhao159357'
 Session:
   Name: "mysession"
