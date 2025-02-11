@@ -79,36 +79,12 @@ function filterMdSymbol(md) {
   <!-- 首页封面图 -->
   <HomeBanner />
   <!-- 内容 -->
-  <div class="mx-auto mb-8 max-w-[1230px] flex flex-col justify-center px-3">
+  <div class="mx-auto max-w-[1230px] flex flex-col justify-center px-3" style="margin-top: calc(100vh)">
     <div class="grid grid-cols-12 gap-4">
       <!-- 左半部分 -->
       <div class="col-span-12 lg:col-span-9 space-y-5">
         <!-- 聊天机器人 -->
-        <!-- <ChatBot /> -->
-        <!-- 说说轮播 -->
-        <!-- <TalkingCarousel /> -->
-        <!-- 文章列表 -->
-        <!-- <div class="space-y-5">
-          <ArticleCard v-for="(item, idx) in articleList" :key="item.id" :article="item" :idx="idx" />
-        </div> -->
-        <!-- 无限加载 -->
-        <!-- <div class="f-c-c">
-          <InfiniteLoading class="mt-2 lg:mt-5" @infinite="getArticlesInfinite">
-            <template #spinner>
-              <span class="animate-pulse text-xl">
-                loading...
-              </span>
-            </template>
-            <template #complete>
-              <span class="flex gap-2 text-gray">
-                没有更多文章啦!
-                <button class="flex items-center" @click="backTop">
-                  点击回到顶部 <span class="i-mdi:arrow-up-bold-box ml-1 inline-block text-xl" />
-                </button>
-              </span>
-            </template>
-          </InfiniteLoading>
-        </div> -->
+        <ChatBot v-if="userStore.userId" />
       </div>
       <!-- 右半部分 -->
       <div class="col-span-0 lg:col-span-3">
@@ -116,15 +92,10 @@ function filterMdSymbol(md) {
         <div class="sticky top-5 space-y-5">
           <!-- 博主信息 -->
           <UserInfo v-if="userStore.userId" />
-          <!-- <AuthorInfo /> -->
-          <!-- 公告 -->
-          <!-- <Announcement /> -->
-          <!-- 网站资讯 -->
-          <!-- <WebsiteInfo /> -->
         </div>
       </div>
     </div>
-    <AppFooter />
   </div>
+  <AppFooter />
   <!-- 底部 -->
 </template>
