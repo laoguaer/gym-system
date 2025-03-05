@@ -101,7 +101,6 @@ func (*Chat) Send(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	log.Println(resp.Body)
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		zap.L().Error("响应读取失败", zap.Error(err))
