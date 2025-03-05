@@ -45,14 +45,14 @@ async function sendMessage() {
     const output = resp.data // 直接使用data字段
     // 添加机器人回复到聊天
     messages.value.push({ type: 'bot', text: output }) // 直接使用output
-    isSending.value = false // 消息发送完成
   }
   catch (error) {
     console.error('与机器人通信时出错:', error)
-    messages.value.push({ type: 'system', text: getSystemMessage('errorr') })
+    messages.value.push({ type: 'system', text: getSystemMessage('error') })
   }
   finally {
     // 等待 DOM 更新后滚动到底部
+    isSending.value = false // 消息发送完成
     await nextTick(() => {
       scrollToBottom()
       inputRef.value?.focus() // 重新聚焦到输入框
