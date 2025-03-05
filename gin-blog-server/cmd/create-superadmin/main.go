@@ -3,15 +3,13 @@ package main
 import (
 	"errors"
 	"flag"
-	"fmt"
 	ginblog "gin-blog/internal"
 	g "gin-blog/internal/global"
 	"gin-blog/internal/model"
 	"gin-blog/internal/utils"
-	"log"
-	"log/slog"
 	"os"
 
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -31,7 +29,7 @@ func main() {
 	db := ginblog.InitDatabase(conf)
 
 	if *username == "" || *password == "" {
-		log.Fatal("请指定超级管理员账户和密码")
+		zap.L().Fatal("请指定超级管理员账户和密码")
 	}
 
 	createSuperAdmin(db, *username, *password)
@@ -50,7 +48,7 @@ func createSuperAdmin(db *gorm.DB, username, password string) {
 			return errors.New(userAuth.Username + " 账户已存在")
 		}
 
-		slog.Info("开始创建超级管理员")
+		zap.L().Info("开始创建超级管理员")
 
 		// 默认生成一个 super admin 用户
 		hashPassword, err := utils.BcryptHash(password)
@@ -77,9 +75,9 @@ func createSuperAdmin(db *gorm.DB, username, password string) {
 	})
 
 	if err != nil {
-		slog.Error("创建超级管理员失败: " + err.Error())
+		zap.L().Error("创建超级管理员失败", zap.Error(err))
 		os.Exit(0)
 	}
 
-	slog.Info(fmt.Sprintf("创建超级管理员成功: %s, 密码: %s\n", username, password))
+	zap.L().Info("创建超级管理员成功", zap.String("username", username), zap.String("password", password))
 }

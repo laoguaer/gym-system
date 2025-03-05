@@ -4,61 +4,22 @@ import (
 	"context"
 	g "gin-blog/internal/global"
 	"gin-blog/internal/model"
+	"gin-blog/internal/utils/logger"
 	"log"
-	"log/slog"
-	"os"
-	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/glebarez/sqlite"
 	"github.com/go-redis/redis/v9"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	glogger "gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
 
-// 根据配置文件初始化 slog 日志
-func InitLogger(conf *g.Config) *slog.Logger {
-	var level slog.Level
-	switch conf.Log.Level {
-	case "debug":
-		level = slog.LevelDebug
-	case "info":
-		level = slog.LevelInfo
-	case "warn":
-		level = slog.LevelWarn
-	case "error":
-		level = slog.LevelError
-	default:
-		level = slog.LevelInfo
-	}
-
-	option := &slog.HandlerOptions{
-		AddSource: false, // TODO: 外层
-		Level:     level,
-		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
-			if a.Key == slog.TimeKey {
-				if t, ok := a.Value.Any().(time.Time); ok {
-					a.Value = slog.StringValue(t.Format(time.DateTime))
-				}
-			}
-			return a
-		},
-	}
-
-	var handler slog.Handler
-	switch conf.Log.Format {
-	case "json":
-		handler = slog.NewJSONHandler(os.Stdout, option)
-	case "text":
-		fallthrough
-	default:
-		handler = slog.NewTextHandler(os.Stdout, option)
-	}
-
-	logger := slog.New(handler)
-	slog.SetDefault(logger)
-	return logger
+// 根据配置文件初始化日志
+func InitLogger(conf *g.Config) *zap.Logger {
+	return logger.InitLogger(conf)
 }
 
 // 根据配置文件初始化数据库
@@ -69,22 +30,22 @@ func InitDatabase(conf *g.Config) *gorm.DB {
 	var db *gorm.DB
 	var err error
 
-	var level logger.LogLevel
+	var level glogger.LogLevel
 	switch conf.Server.DbLogMode {
 	case "silent":
-		level = logger.Silent
+		level = glogger.Silent
 	case "info":
-		level = logger.Info
+		level = glogger.Info
 	case "warn":
-		level = logger.Warn
+		level = glogger.Warn
 	case "error":
 		fallthrough
 	default:
-		level = logger.Error
+		level = glogger.Error
 	}
 
 	config := &gorm.Config{
-		Logger:                                   logger.Default.LogMode(level),
+		Logger:                                   glogger.Default.LogMode(level),
 		DisableForeignKeyConstraintWhenMigrating: true, // 禁用外键约束
 		SkipDefaultTransaction:                   true, // 禁用默认事务（提高运行速度）
 		NamingStrategy: schema.NamingStrategy{

@@ -7,10 +7,10 @@ import (
 	"gin-blog/internal/model"
 	"gin-blog/internal/utils"
 	"io"
-	"log/slog"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -38,22 +38,6 @@ var optMap = map[string]string{
 
 func GetOptString(key string) string {
 	return optMap[key]
-}
-
-// 在 gin 中获取 Response Body 内容: 对 gin 的 ResponseWriter 进行包装, 每次往请求方响应数据时, 将响应数据返回出去
-type CustomResponseWriter struct {
-	gin.ResponseWriter
-	body *bytes.Buffer // 响应体缓存
-}
-
-func (w CustomResponseWriter) Write(b []byte) (int, error) {
-	w.body.Write(b) // 将响应数据存到缓存中
-	return w.ResponseWriter.Write(b)
-}
-
-func (w CustomResponseWriter) WriteString(s string) (int, error) {
-	w.body.WriteString(s) // 将响应数据存到缓存中
-	return w.ResponseWriter.WriteString(s)
 }
 
 // 记录操作日志中间件
@@ -95,7 +79,7 @@ func OperationLog() gin.HandlerFunc {
 
 			db := c.MustGet(g.CTX_DB).(*gorm.DB)
 			if err := db.Create(&operationLog).Error; err != nil {
-				slog.Error("操作日志记录失败: ", err)
+				zap.L().Error("操作日志记录失败", zap.Error(err))
 				handle.ReturnError(c, g.ErrDbOp, err)
 				return
 			}

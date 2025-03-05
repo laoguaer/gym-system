@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -296,9 +297,9 @@ func generateDefaultResources(db *gorm.DB) {
 			if resource.ID != 0 {
 				if err := db.Create(&model.RoleResource{RoleId: adminRole.ID, ResourceId: resource.ID}).Error; err != nil {
 					if strings.Contains(err.Error(), "UNIQUE constraint failed") || strings.Contains(err.Error(), "Duplicate entry") {
-						slog.Info("admin 角色菜单关联关系初始化失败" + err.Error())
+						zap.L().Info("admin 角色菜单关联关系已经存在")
 					} else {
-						slog.Error("admin 角色菜单关联关系初始化失败" + err.Error())
+						zap.L().Error("admin 角色菜单关联关系初始化失败", zap.Error(err))
 					}
 				}
 			}
@@ -312,9 +313,9 @@ func generateDefaultResources(db *gorm.DB) {
 			if resource.ID != 0 && resource.Method == "GET" {
 				if err := db.Create(&model.RoleResource{RoleId: guestRole.ID, ResourceId: resource.ID}).Error; err != nil {
 					if strings.Contains(err.Error(), "UNIQUE constraint failed") || strings.Contains(err.Error(), "Duplicate entry") {
-						slog.Info("guest 角色菜单关联关系初始化失败" + err.Error())
+						zap.L().Info("guest 角色菜单关联关系已经存在")
 					} else {
-						slog.Error("guest 角色菜单关联关系初始化失败" + err.Error())
+						zap.L().Error("guest 角色菜单关联关系初始化失败", zap.Error(err))
 					}
 				}
 			}
@@ -396,9 +397,9 @@ func generateDefaultMenus(db *gorm.DB) {
 			if menu.ID != 0 {
 				if err := db.Create(&model.RoleMenu{RoleId: adminRole.ID, MenuId: menu.ID}).Error; err != nil {
 					if strings.Contains(err.Error(), "UNIQUE constraint failed") || strings.Contains(err.Error(), "Duplicate entry") {
-						slog.Info("admin 角色菜单关联关系初始化失败" + err.Error())
+						zap.L().Info("admin 角色菜单关联关系已经存在")
 					} else {
-						slog.Error("admin 角色菜单关联关系初始化失败" + err.Error())
+						zap.L().Error("admin 角色菜单关联关系初始化失败", zap.Error(err))
 					}
 				}
 			}
@@ -412,9 +413,9 @@ func generateDefaultMenus(db *gorm.DB) {
 			if menu.ID != 0 {
 				if err := db.Create(&model.RoleMenu{RoleId: guestRole.ID, MenuId: menu.ID}).Error; err != nil {
 					if strings.Contains(err.Error(), "UNIQUE constraint failed") || strings.Contains(err.Error(), "Duplicate entry") {
-						slog.Info("guest 角色菜单关联关系初始化失败" + err.Error())
+						zap.L().Info("guest 角色菜单关联关系已经存在")
 					} else {
-						slog.Error("guest 角色菜单关联关系初始化失败" + err.Error())
+						zap.L().Error("guest 角色菜单关联关系初始化失败", zap.Error(err))
 					}
 				}
 			}

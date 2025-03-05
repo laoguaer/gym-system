@@ -4,7 +4,6 @@ import (
 	"errors"
 	g "gin-blog/internal/global"
 	"gin-blog/internal/handle"
-	"log/slog"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -12,6 +11,8 @@ import (
 	"runtime/debug"
 	"strings"
 	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
@@ -76,17 +77,17 @@ func Logger() gin.HandlerFunc {
 		c.Next()
 		cost := time.Since(start)
 
-		slog.Info("[GIN]",
-			slog.String("path", c.Request.URL.Path),
-			slog.String("query", c.Request.URL.RawQuery),
-			slog.Int("status", c.Writer.Status()),
-			slog.String("method", c.Request.Method),
-			slog.String("ip", c.ClientIP()),
-			slog.Int("size", c.Writer.Size()),
-			slog.Duration("cost", cost),
-			// slog.String("body", c.Request.PostForm.Encode()),
-			// slog.String("user-agent", c.Request.UserAgent()),
-			// slog.String("errors", c.Errors.ByType(gin.ErrorTypePrivate).String()),
+		zap.L().Info("[GIN]",
+			zap.String("path", c.Request.URL.Path),
+			zap.String("query", c.Request.URL.RawQuery),
+			zap.Int("status", c.Writer.Status()),
+			zap.String("method", c.Request.Method),
+			zap.String("ip", c.ClientIP()),
+			zap.Int("size", c.Writer.Size()),
+			zap.Duration("cost", cost),
+			// zap.String("body", c.Request.PostForm.Encode()),
+			// zap.String("user-agent", c.Request.UserAgent()),
+			// zap.String("errors", c.Errors.ByType(gin.ErrorTypePrivate).String()),
 		)
 	}
 }
@@ -126,9 +127,9 @@ func Recovery(stack bool) gin.HandlerFunc {
 
 				httpRequest, _ := httputil.DumpRequest(c.Request, false)
 				if brokenPipe {
-					slog.Error(c.Request.URL.Path,
-						slog.Any("error", err),
-						slog.String("request", string(httpRequest)),
+					zap.L().Error(c.Request.URL.Path,
+						zap.Any("error", err),
+						zap.String("request", string(httpRequest)),
 					)
 					// If the connection is dead, we can't write a status to it.
 					_ = c.Error(err.(error)) // errcheck
@@ -137,15 +138,15 @@ func Recovery(stack bool) gin.HandlerFunc {
 				}
 
 				if stack {
-					slog.Error("[Recovery from panic]",
-						slog.Any("error", err),
-						slog.String("request", string(httpRequest)),
-						slog.String("stack", string(debug.Stack())),
+					zap.L().Error("[Recovery from panic]",
+						zap.Any("error", err),
+						zap.String("request", string(httpRequest)),
+						zap.String("stack", string(debug.Stack())),
 					)
 				} else {
-					slog.Error("[Recovery from panic]",
-						slog.Any("error", err),
-						slog.String("request", string(httpRequest)),
+					zap.L().Error("[Recovery from panic]",
+						zap.Any("error", err),
+						zap.String("request", string(httpRequest)),
 					)
 				}
 				c.AbortWithStatus(http.StatusInternalServerError)

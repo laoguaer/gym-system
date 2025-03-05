@@ -5,10 +5,10 @@ import (
 	ginblog "gin-blog/internal"
 	g "gin-blog/internal/global"
 	"gin-blog/internal/middleware"
-	"log"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -47,9 +47,9 @@ func main() {
 
 	serverAddr := conf.Server.Port
 	if serverAddr[0] == ':' || strings.HasPrefix(serverAddr, "0.0.0.0:") {
-		log.Printf("Serving HTTP on (http://localhost:%s/) ... \n", strings.Split(serverAddr, ":")[1])
+		zap.L().Info("Starting server", zap.String("url", "http://localhost:"+strings.Split(serverAddr, ":")[1]))
 	} else {
-		log.Printf("Serving HTTP on (http://%s/) ... \n", serverAddr)
+		zap.L().Info("Starting server", zap.String("url", "http://"+serverAddr))
 	}
 	r.Run(serverAddr)
 }

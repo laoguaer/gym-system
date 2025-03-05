@@ -11,6 +11,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 /*
@@ -47,12 +48,12 @@ type CozeReq struct {
 	WorkflowId string            `json:"workflow_id" binding:"required"`
 }
 type CozeResp struct {
-	Code     int      `json:"code"`
-	Cost     string   `json:"cost"`
+	Code     int    `json:"code"`
+	Cost     string `json:"cost"`
 	Data     string `json:"data"`
-	DebugUrl string   `json:"debug_url"`
-	Msg      string   `json:"msg"`
-	Token    int      `json:"token"`
+	DebugUrl string `json:"debug_url"`
+	Msg      string `json:"msg"`
+	Token    int    `json:"token"`
 }
 type CozeData struct {
 	ContentType    int    `json:"content_type"`
@@ -65,6 +66,7 @@ func (*Chat) Send(c *gin.Context) {
 	var req ChatReq
 
 	if err := c.ShouldBindJSON(&req); err != nil {
+		zap.L().Error("请求参数绑定失败", zap.Error(err), zap.Any("request", req))
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -72,6 +74,7 @@ func (*Chat) Send(c *gin.Context) {
 	workflowId := g.GetConfig().Coze.WorkflowId
 	configMap, err := model.GetConfigMap(GetDB(c))
 	if err != nil {
+		zap.L().Error("获取配置失败", zap.Error(err))
 		ReturnError(c, g.ErrDbOp, err)
 		return
 	}
@@ -83,6 +86,7 @@ func (*Chat) Send(c *gin.Context) {
 	requestBody, _ := json.Marshal(cozeReq)
 	httpReq, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
 	if err != nil {
+		zap.L().Error("请求创建失败", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "请求创建失败"})
 		return
 	}
@@ -92,6 +96,7 @@ func (*Chat) Send(c *gin.Context) {
 	client := &http.Client{}
 	resp, err := client.Do(httpReq)
 	if err != nil {
+		zap.L().Error("请求发送失败", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "请求发送失败"})
 		return
 	}
@@ -99,18 +104,22 @@ func (*Chat) Send(c *gin.Context) {
 	log.Println(resp.Body)
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
+		zap.L().Error("响应读取失败", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "响应读取失败"})
 		return
 	}
 	var apiResp CozeResp
 	if err := json.Unmarshal(bodyBytes, &apiResp); err != nil {
+		zap.L().Error("响应解析失败", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("响应：%v 响应解析失败: %v", string(bodyBytes), err)})
 		return
 	}
 	var cozeData CozeData
 	if err := json.Unmarshal([]byte(apiResp.Data), &cozeData); err != nil {
+		zap.L().Error("响应解析失败", zap.Error(err), zap.String("resp", apiResp.Data))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("响应：%v 响应解析失败: %v", string(bodyBytes), err)})
 		return
 	}
 	log.Printf("chat Request: %v\n response: %v", string(requestBody), apiResp)
-	c.JSON(http.StatusOK, apiResp) }
+	c.JSON(http.StatusOK, apiResp)
+}
