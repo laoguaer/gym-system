@@ -16,6 +16,7 @@ import Announcement from './components/Announcement.vue'
 import TalkingCarousel from './components/TalkingCarousel.vue'
 import ChatBot from './components/ChatBot.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
+import TrainerOverview from '@/components/TrainerOverview.vue'
 
 import api from '@/api'
 
@@ -57,21 +58,13 @@ function filterMdSymbol(md) {
       <UserInfo />
     </div>
     <!-- 聊天机器人 -->
-    <div v-if="userStore.userId" class="absolute left-5 top-60 z-10 w-80 -translate-y-1/2">
+    <div v-if="userStore.userId" class="absolute left-5 top-80 z-10 w-80 -translate-y-1/2">
       <ChatBot />
     </div>
   </div>
   <!-- 内容 -->
   <div class="mx-auto max-w-[1230px] flex flex-col justify-center px-3" style="margin-top: calc(100vh)">
-    <div class="grid grid-cols-12 gap-4">
-      <!-- 左半部分 -->
-      <div class="col-span-12 lg:col-span-9 space-y-5" />
-      <!-- 右半部分 -->
-      <div class="col-span-0 lg:col-span-3">
-        <!-- sticky 实现悬浮固定效果 -->
-        <div class="sticky top-5 space-y-5" />
-      </div>
-    </div>
+    <TrainerOverview />
   </div>
   <AppFooter />
 </template>
