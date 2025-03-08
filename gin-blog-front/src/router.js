@@ -15,7 +15,7 @@ const basicRoutes = [
   {
     name: 'Article',
     path: '/article/:id',
-    component: () => import('@/views/article/detail/index.vue'),
+    component: () => import('@/views/teaching/article/detail/index.vue'),
   },
   {
     name: 'Archive',
@@ -36,7 +36,7 @@ const basicRoutes = [
   {
     name: 'CategoryArticles',
     path: '/categories/:categoryId',
-    component: () => import('@/views/article/list/index.vue'),
+    component: () => import('@/views/teaching/article/list/index.vue'),
     meta: {
       title: '分类',
     },
@@ -52,17 +52,9 @@ const basicRoutes = [
   {
     name: 'TagArticles',
     path: '/tags/:tagId',
-    component: () => import('@/views/article/list/index.vue'),
+    component: () => import('@/views/teaching/article/list/index.vue'),
     meta: {
       title: '标签',
-    },
-  },
-  {
-    name: 'Album',
-    path: '/albums',
-    component: () => import('@/views/entertainment/album/index.vue'),
-    meta: {
-      title: '相册',
     },
   },
   {
@@ -100,12 +92,22 @@ const basicRoutes = [
   {
     name: 'TrainerInfo',
     path: '/trainerInfo',
-    component: () => import('@/views/trainer/index.vue'),
+    component: () => import('@/views/trainer/trainerInfo/index.vue'),
   },
   {
     name: 'MyTrainer',
     path: '/myTrainer',
-    component: () => import('@/views/trainer/index.vue'),
+    component: () => import('@/views/trainer/myTrainer/index.vue'),
+  },
+  {
+    name: 'TeachingText',
+    path: '/teachingText',
+    component: () => import('@/views/teaching/teachingText/index.vue'),
+  },
+  {
+    name: 'TeachingVideo',
+    path: '/teachingVideo',
+    component: () => import('@/views/teaching/teachingVideo/index.vue'),
   },
   {
     name: '404',

@@ -7,13 +7,11 @@ import InfiniteLoading from 'v3-infinite-loading'
 // Markdown => Html
 import { marked } from 'marked'
 
-import ArticleCard from './components/ArticleCard.vue'
 import AuthorInfo from './components/AuthorInfo.vue'
 import UserInfo from './components/UserInfo.vue'
 import WebsiteInfo from './components/WebsiteInfo.vue'
 import HomeBanner from './components/HomeBanner.vue'
 import Announcement from './components/Announcement.vue'
-import TalkingCarousel from './components/TalkingCarousel.vue'
 import ChatBot from './components/ChatBot.vue'
 import TrainerOverview from './components/TrainerOverview.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'

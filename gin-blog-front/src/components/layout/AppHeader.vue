@@ -32,12 +32,12 @@ const menuOptions = [
       { text: '我的课程', icon: 'mdi:menu', path: '/mycourse' },
     ],
   },
-  { 
-    text: '健身教学', 
+  {
+    text: '健身教学',
     icon: 'mdi:vector-link',
     subMenu: [
-      { text: '健身文章', icon: 'mdi:view-list', path: '/gym-teaching' },
-      { text: '健身教学短片', icon: 'mdi:menu', path: '/my-gym-teaching' },
+      { text: '健身文章', icon: 'mdi:view-list', path: '/teachingText' },
+      { text: '健身教学短片', icon: 'mdi:menu', path: '/teachingVideo' },
     ],
   },
   {

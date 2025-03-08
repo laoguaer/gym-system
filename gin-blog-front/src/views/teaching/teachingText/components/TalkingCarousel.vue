@@ -4,7 +4,7 @@ import { onMounted, ref } from 'vue'
 const sentence = ref('书山有路勤为径，学海无涯苦作舟。')
 
 onMounted(() => {
-  fetch('https://v1.hitokoto.cn?c=i')
+  fetch('https://v1.hitokoto.cn?c=k')
     .then(res => res.json())
     .then(data => sentence.value = data.hitokoto)
 })
