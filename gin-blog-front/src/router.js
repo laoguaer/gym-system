@@ -9,7 +9,7 @@ const basicRoutes = [
     path: '/',
     component: () => import('@/views/home/index.vue'),
     meta: {
-      title: '首页',  
+      title: '首页',
     },
   },
   {
@@ -96,6 +96,16 @@ const basicRoutes = [
     meta: {
       title: '个人中心',
     },
+  },
+  {
+    name: 'TrainerInfo',
+    path: '/trainerInfo',
+    component: () => import('@/views/trainer/index.vue'),
+  },
+  {
+    name: 'MyTrainer',
+    path: '/myTrainer',
+    component: () => import('@/views/trainer/index.vue'),
   },
   {
     name: '404',

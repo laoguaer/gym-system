@@ -15,8 +15,8 @@ import HomeBanner from './components/HomeBanner.vue'
 import Announcement from './components/Announcement.vue'
 import TalkingCarousel from './components/TalkingCarousel.vue'
 import ChatBot from './components/ChatBot.vue'
+import TrainerOverview from './components/TrainerOverview.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
-import TrainerOverview from '@/components/TrainerOverview.vue'
 
 import api from '@/api'
 
@@ -54,7 +54,7 @@ function filterMdSymbol(md) {
   <div class="relative">
     <HomeBanner />
     <!-- 用户信息卡片 -->
-    <div v-if="userStore.userId" class="absolute right-5 top-15 z-10">
+    <div v-if="userStore.userId" class="absolute right-5 top-40 z-10">
       <UserInfo />
     </div>
     <!-- 聊天机器人 -->
@@ -63,7 +63,7 @@ function filterMdSymbol(md) {
     </div>
   </div>
   <!-- 内容 -->
-  <div class="mx-auto max-w-[1230px] flex flex-col justify-center px-3" style="margin-top: calc(100vh)">
+  <div class="mx-auto h-[calc(100vh)] max-w-[1400px] flex flex-col justify-center px-3" style="margin-top: calc(100vh)">
     <TrainerOverview />
   </div>
   <AppFooter />

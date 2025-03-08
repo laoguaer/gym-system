@@ -20,8 +20,8 @@ const menuOptions = [
     text: '教练团队',
     icon: 'mdi:apple-safari',
     subMenu: [
-      { text: '教练信息预览', icon: 'mdi:view-list', path: '/coachinfo' },
-      { text: '我的教练', icon: 'mdi:menu', path: '/mycoach' },
+      { text: '教练信息预览', icon: 'mdi:view-list', path: '/trainerInfo' },
+      { text: '我的教练', icon: 'mdi:menu', path: '/myTrainer' },
     ],
   },
   {
@@ -30,15 +30,6 @@ const menuOptions = [
     subMenu: [
       { text: '课程信息预览', icon: 'mdi:view-gallery', path: '/courseinfo' },
       { text: '我的课程', icon: 'mdi:menu', path: '/mycourse' },
-    ],
-  },
-  {
-    text: '健身用品',
-    icon: 'mdi:shopping',
-    subMenu: [
-      { text: '健身用品介绍', icon: 'mdi:view-list', path: '/products' },
-      { text: '健身用品分类', icon: 'mdi:menu', path: '/product-categories' },
-      { text: '我的健身用品', icon: 'mdi:menu', path: '/myproduct' },
     ],
   },
   { 
