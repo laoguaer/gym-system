@@ -1,9 +1,6 @@
 @echo off
 
-REM 进入cmd目录
-cd cmd
-
-REM 运行main.go
-go run main.go
+REM 使用air工具启动应用，实现热重载
+air
 
 pause

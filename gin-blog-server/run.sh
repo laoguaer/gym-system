@@ -1,7 +1,4 @@
 #!/bin/bash
 
-# 进入cmd目录
-cd cmd
-
-# 运行main.go
-go run main.go
+# 使用air工具启动应用，实现热重载
+air
