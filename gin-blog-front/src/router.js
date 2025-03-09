@@ -110,6 +110,11 @@ const basicRoutes = [
     component: () => import('@/views/teaching/teachingVideo/index.vue'),
   },
   {
+    name: 'Video',
+    path: '/video/:id',
+    component: () => import('@/views/teaching/teachingVideo/detail/index.vue'),
+  },
+  {
     name: '404',
     path: '/404',
     component: () => import('@/views/error-page/404.vue'),

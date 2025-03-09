@@ -21,6 +21,8 @@ export default {
   getArchives: (params = {}) => request.get('/article/archive', { params }),
   /** 文章搜索 */
   searchArticles: (params = {}) => request.get('/article/search', { params }),
+  /** 获取视频列表 */
+  getVideos: params => request.get('/video/list', { params }),
 
   /** 菜单列表 */
   getCategorys: () => request.get('/category/list'),
