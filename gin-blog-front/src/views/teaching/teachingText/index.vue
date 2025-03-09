@@ -44,6 +44,7 @@ onMounted(async () => {
   loading.value = true
   // 首次加载
   const resp = await api.getArticles(params)
+  console.log('artical ', resp)
   articleList.value = resp.data
   // 过滤 Markdown 符号
   articleList.value.forEach(e => e.content = filterMdSymbol(e.content))

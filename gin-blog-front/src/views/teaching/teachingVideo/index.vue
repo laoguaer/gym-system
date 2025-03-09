@@ -18,9 +18,10 @@ const params = reactive({ page_size: 5, page_num: 1 }) // 列表加载参数
 async function getVideosInfinite($state) {
   if (!loading.value) {
     try {
+      console.log('infnit 加载视频')
       const resp = await api.getVideos(params)
       // 加载完成
-      if (!resp.data.length) {
+      if (!resp.data.page_data.length) {
         $state.complete()
         return
       }
@@ -30,7 +31,8 @@ async function getVideosInfinite($state) {
       $state.loaded()
     }
     catch (error) {
-      $state.error()
+      console.error('加载视频失败:', error)
+      $state.error(error)
     }
   }
 }
@@ -41,6 +43,7 @@ onMounted(async () => {
   try {
     const resp = await api.getVideos(params)
     videoList.value = resp.data
+    console.log('首次加载视频', resp)
     params.page_num++
   }
   catch (error) {
@@ -66,11 +69,8 @@ function backTop() {
         <!-- 视频轮播 -->
         <VideoCarousel />
         <!-- 视频列表 -->
-        <div v-if="videoList.length > 0" class="space-y-5">
+        <div class="space-y-5">
           <VideoCard v-for="(item, idx) in videoList" :key="item.id" :video="item" :idx="idx" />
-        </div>
-        <div v-else-if="!loading" class="h-[200px] f-c-c text-gray">
-          暂无视频内容
         </div>
         <!-- 无限加载 -->
         <div class="f-c-c">

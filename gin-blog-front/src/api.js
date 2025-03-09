@@ -23,6 +23,8 @@ export default {
   searchArticles: (params = {}) => request.get('/article/search', { params }),
   /** 获取视频列表 */
   getVideos: params => request.get('/video/list', { params }),
+  /** 获取视频列表 */
+  getVideoDetail: id => request.get(`/video/${id}`),
 
   /** 菜单列表 */
   getCategorys: () => request.get('/category/list'),
