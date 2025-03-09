@@ -13,9 +13,10 @@ import (
 var (
 	// 后台管理系统接口
 
-	categoryAPI     handle.Category     // 分类
-	tagAPI          handle.Tag          // 标签
-	articleAPI      handle.Article      // 文章
+	categoryAPI     handle.Category // 分类
+	tagAPI          handle.Tag      // 标签
+	articleAPI      handle.Article  // 文章
+	videoAPI        handle.Video
 	userAPI         handle.User         // 用户
 	userAuthAPI     handle.UserAuth     // 用户账号
 	commentAPI      handle.Comment      // 评论
@@ -195,6 +196,12 @@ func registerBlogHandler(r *gin.Engine) {
 		article.GET("/:id", frontAPI.GetArticleInfo)     // 前台文章详情
 		article.GET("/archive", frontAPI.GetArchiveList) // 前台文章归档
 		article.GET("/search", frontAPI.SearchArticle)   // 前台文章搜索
+	}
+	// 视频模块
+	videos := base.Group("/video")
+	{
+		videos.GET("/list", videoAPI.GetList) // 文章列表
+		videos.GET("/:id", videoAPI.GetDetail)
 	}
 	category := base.Group("/category")
 	{

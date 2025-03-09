@@ -2,6 +2,8 @@ package handle
 
 import (
 	g "gin-blog/internal/global"
+	"gin-blog/internal/model"
+
 	// "gin-blog/internal/model"
 	"strconv"
 
@@ -21,19 +23,11 @@ type VideoQuery struct {
 
 // 视频数据传输对象
 type VideoVO struct {
-	ID           int    `json:"id"`
-	Title        string `json:"title"`
-	Desc         string `json:"desc"`
-	Cover        string `json:"cover"`
-	Url          string `json:"video_url"`
-	Status       int    `json:"status"`
-	CategoryId   int    `json:"category_id"`
-	CategoryName string `json:"category_name"`
-	ViewCount    int    `json:"view_count"`
-	LikeCount    int    `json:"like_count"`
-	CommentCount int    `json:"comment_count"`
-	CreatedAt    string `json:"created_at"`
-	UpdatedAt    string `json:"updated_at"`
+	model.Video
+
+	LikeCount    int `json:"like_count" gorm:"-"`
+	ViewCount    int `json:"view_count" gorm:"-"`
+	CommentCount int `json:"comment_count" gorm:"-"`
 }
 
 // @Summary 获取视频列表
@@ -57,31 +51,24 @@ func (*Video) GetList(c *gin.Context) {
 	}
 
 	db := GetDB(c)
-	// rdb := GetRDB(c)
+	rdb := GetRDB(c)
+	_ = rdb
 
-	// 这里应该调用model层的GetVideoList方法，但由于模型尚未定义，这里先模拟返回数据
-	// 实际开发中，需要先在model包中定义Video模型和相关方法
-	// list, total, err := model.GetVideoList(db, query.Page, query.Size, query.Title, query.IsDelete, query.Status, query.CategoryId)
-	_ = db // 临时使用db变量，避免未使用导入的错误
+	// 调用model层的GetVideoList方法获取视频列表
+	list, total, err := model.GetVideoList(db, query.Page, query.Size, query.Title, query.IsDelete, query.Status, query.CategoryId)
+	if err != nil {
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
 
-	// 模拟数据
-	total := int64(10)
-	list := make([]VideoVO, 0)
-	for i := 1; i <= 5; i++ {
-		list = append(list, VideoVO{
-			ID:           i,
-			Title:        "视频标题" + strconv.Itoa(i),
-			Desc:         "视频描述" + strconv.Itoa(i),
-			Cover:        "https://example.com/cover" + strconv.Itoa(i) + ".jpg",
-			Url:          "https://example.com/video" + strconv.Itoa(i) + ".mp4",
-			Status:       1,
-			CategoryId:   1,
-			CategoryName: "教程",
-			ViewCount:    100 + i,
-			LikeCount:    50 + i,
-			CommentCount: 20 + i,
-			CreatedAt:    "2023-01-0" + strconv.Itoa(i) + " 12:00:00",
-			UpdatedAt:    "2023-01-0" + strconv.Itoa(i) + " 12:00:00",
+	// 将Video模型转换为VideoVO
+	data := make([]VideoVO, 0)
+	for _, video := range list {
+		data = append(data, VideoVO{
+			Video:        video,
+			LikeCount:    0, // 实际项目中从Redis获取
+			ViewCount:    0, // 实际项目中从Redis获取
+			CommentCount: 0, // 实际项目中从评论表获取
 		})
 	}
 
@@ -93,6 +80,37 @@ func (*Video) GetList(c *gin.Context) {
 		Size:  query.Size,
 		Page:  query.Page,
 		Total: total,
-		List:  list,
+		List:  data,
 	})
+}
+
+func (*Video) GetDetail(c *gin.Context) {
+	_, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		ReturnError(c, g.ErrRequest, err)
+		return
+	}
+
+	// article, err := model.GetArticle(GetDB(c), id)
+	detail := VideoVO{
+		// ID:           id,
+		// Title:        "视频标题" + strconv.Itoa(id),
+		// Desc:         "视频描述" + strconv.Itoa(id),
+		// Cover:        "https://example.com/cover" + strconv.Itoa(id) + ".jpg",
+		// Url:          "https://example.com/video" + strconv.Itoa(id) + ".mp4",
+		// Status:       1,
+		// CategoryId:   1,
+		// CategoryName: "教程",
+		// ViewCount:    100 + id,
+		// LikeCount:    50 + id,
+		// CommentCount: 20 + id,
+		// CreatedAt:    "2023-01-0" + strconv.Itoa(id) + " 12:00:00",
+		// UpdatedAt:    "2023-01-0" + strconv.Itoa(id) + " 12:00:00",
+	}
+	if err != nil {
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
+
+	ReturnSuccess(c, detail)
 }
