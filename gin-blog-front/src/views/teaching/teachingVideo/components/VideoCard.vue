@@ -18,12 +18,12 @@ const isRightClass = computed(() => props.idx % 2 === 0
 <template>
   <div class="group h-[430px] w-full flex flex-col animate-zoom-in animate-duration-700 items-center rounded-xl bg-white shadow-md transition-600 md:h-[280px] md:flex-row hover:shadow-2xl">
     <!-- 封面图 -->
-    <div :class="isRightClass" class="h-[230px] w-full overflow-hidden md:h-full md:w-45/100 relative">
+    <div :class="isRightClass" class="relative h-[230px] w-full overflow-hidden md:h-full md:w-45/100">
       <RouterLink :to="`/video/${video.id}`">
-        <img class="h-full w-full transition-600 hover:scale-110" :src="video.cover || convertImgUrl(video.img)">
+        <img class="h-full w-full transition-600 hover:scale-110" :src="video.cover">
         <!-- 播放按钮覆盖在封面上 -->
         <div class="absolute inset-0 flex items-center justify-center opacity-0 transition-300 group-hover:opacity-100">
-          <span class="i-mdi-play-circle text-5xl text-white bg-black bg-opacity-50 rounded-full"></span>
+          <span class="i-mdi-play-circle rounded-full bg-black bg-opacity-50 text-5xl text-white" />
         </div>
       </RouterLink>
     </div>

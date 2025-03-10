@@ -61,7 +61,7 @@ function backTop() {
 
 <template>
   <!-- 内容 -->
-  <div class="mx-auto mb-8 mt-20 max-w-[1230px] flex flex-col justify-center px-3">
+  <div class="mx-auto mb-8 mt-20 w-75% flex flex-col justify-center px-3">
     <div class="grid grid-cols-12 gap-4">
       <div />
       <!-- 左半部分 -->

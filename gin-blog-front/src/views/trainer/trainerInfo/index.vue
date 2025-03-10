@@ -7,7 +7,7 @@ import api from '@/api'
 </script>
 
 <template>
-  <div class="h-[100vh] flex flex-col px-4 py-4">
+  <div class="min-h-[100vh] flex flex-col px-4 py-4">
     <TrainerInfo />
   </div>
 

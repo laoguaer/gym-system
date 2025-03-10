@@ -2,8 +2,12 @@
 import { convertImgUrl } from '@/utils'
 
 const { lastVideo, nextVideo } = defineProps({
-  lastVideo: {},
-  nextVideo: {},
+  lastVideo: {
+    default: () => ({})
+  },
+  nextVideo: {
+    default: () => ({})
+  },
 })
 </script>
 
