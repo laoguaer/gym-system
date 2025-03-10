@@ -9,6 +9,7 @@ const categoryList = ref([])
 
 onMounted(async () => {
   const resp = await api.getCategorys()
+  console.log("categories", resp)
   categoryList.value = resp.data
   loading.value = false
 })

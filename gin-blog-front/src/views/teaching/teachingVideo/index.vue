@@ -21,7 +21,7 @@ async function getVideosInfinite($state) {
       console.log('infnit 加载视频')
       const resp = await api.getVideos(params)
       // 加载完成
-      if (!resp.data.page_data.length) {
+      if (!resp.data.length) {
         $state.complete()
         return
       }

@@ -8,6 +8,7 @@ const tagList = ref([])
 
 onMounted(() => {
   api.getTags().then((resp) => {
+    console.log('tags', resp)
     tagList.value = resp.data || []
     loading.value = false
   })
