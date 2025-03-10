@@ -200,8 +200,8 @@ func registerBlogHandler(r *gin.Engine) {
 	// 视频模块
 	videos := base.Group("/video")
 	{
-		videos.GET("/list", videoAPI.GetList) // 文章列表
-		videos.GET("/:id", videoAPI.GetDetail)
+		videos.GET("/list", frontAPI.GetVideoList) // 视频列表
+		videos.GET("/:id", frontAPI.GetVideoDetail) // 视频详情
 	}
 	category := base.Group("/category")
 	{

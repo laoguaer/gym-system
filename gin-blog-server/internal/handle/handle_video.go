@@ -30,19 +30,6 @@ type VideoVO struct {
 	CommentCount int `json:"comment_count" gorm:"-"`
 }
 
-// @Summary 获取视频列表
-// @Description 根据条件查询获取视频列表
-// @Tags Video
-// @Param title query string false "标题"
-// @Param category_id query int false "分类ID"
-// @Param status query int false "状态"
-// @Param is_delete query bool false "是否删除"
-// @Param page_num query int false "页码"
-// @Param page_size query int false "每页数量"
-// @Accept json
-// @Produce json
-// @Success 0 {object} Response[PageResult[VideoVO]]
-// @Router /front/video/list [get]
 func (*Video) GetList(c *gin.Context) {
 	var query VideoQuery
 	if err := c.ShouldBindQuery(&query); err != nil {

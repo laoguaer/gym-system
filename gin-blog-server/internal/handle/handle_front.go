@@ -4,10 +4,10 @@ import (
 	g "gin-blog/internal/global"
 	"gin-blog/internal/model"
 	"gin-blog/internal/utils"
+	"html/template"
 	"strconv"
 	"strings"
 	"time"
-	"html/template"
 
 	"github.com/gin-gonic/gin"
 )
@@ -42,6 +42,11 @@ type FArticleQuery struct {
 	PageQuery
 	CategoryId int `form:"category_id"`
 	TagId      int `form:"tag_id"`
+}
+
+type FVideoQuery struct {
+	PageQuery
+	CategoryId int `form:"category_id"`
 }
 
 type ArchiveVO struct {
@@ -111,6 +116,63 @@ func (*Front) GetLinkList(c *gin.Context) {
 	}
 
 	ReturnSuccess(c, list)
+}
+
+// 获取视频列表
+func (*Front) GetVideoList(c *gin.Context) {
+	var query FVideoQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		ReturnError(c, g.ErrRequest, err)
+		return
+	}
+
+	db := GetDB(c)
+	// 只获取公开且未删除的视频
+	isDelete := false
+	status := model.VIDEO_STATUS_PUBLIC
+	list, _, err := model.GetVideoList(db, query.Page, query.Size, "", &isDelete, status, query.CategoryId)
+	if err != nil {
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
+
+	ReturnSuccess(c, list)
+}
+
+// 获取视频详情
+func (*Front) GetVideoDetail(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		ReturnError(c, g.ErrRequest, err)
+		return
+	}
+
+	db := GetDB(c)
+	rdb := GetRDB(c)
+
+	// 获取视频详情
+	video, err := model.GetVideo(db, id)
+	if err != nil {
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
+
+	// 更新视频浏览量
+	rdb.ZIncrBy(rctx, g.ARTICLE_VIEW_COUNT, 1, strconv.Itoa(id))
+
+	// 获取视频的点赞数、观看数和评论数
+	likeCount, _ := strconv.Atoi(rdb.HGet(rctx, g.ARTICLE_LIKE_COUNT, strconv.Itoa(id)).Val())
+	viewCount := int(rdb.ZScore(rctx, g.ARTICLE_VIEW_COUNT, strconv.Itoa(id)).Val())
+	commentCount, _ := model.GetArticleCommentCount(db, id)
+
+	videoVO := VideoVO{
+		Video:        *video,
+		LikeCount:    likeCount,
+		ViewCount:    viewCount,
+		CommentCount: int(commentCount),
+	}
+
+	ReturnSuccess(c, videoVO)
 }
 
 /*
