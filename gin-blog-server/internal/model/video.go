@@ -18,9 +18,10 @@ type Video struct {
 	Title    string `gorm:"type:varchar(100);not null" json:"title"`
 	Desc     string `json:"desc"`
 	Cover    string `json:"cover"`
-	Url      string `gorm:"type:varchar(255)" json:"video_url"`
+	Url      string `gorm:"type:varchar(255)" json:"url"`
 	Status   int    `gorm:"type:tinyint;comment:状态(1-公开 2-私密 3-草稿)" json:"status"` // 1-公开 2-私密 3-草稿
 	IsDelete bool   `json:"is_delete"`
+	Bvid     string `gorm:"type:varchar(40)" json:"bvid"`
 
 	CategoryId int `json:"category_id"`
 	UserId     int `json:"-"` // user_auth_id
