@@ -44,8 +44,8 @@ const menuOptions = [
     text: '客户见证',
     icon: 'mdi:comment-quote',
     subMenu: [
-      { text: '会员感想', icon: 'mdi:view-list', path: '/customer-testimonials' },
-      { text: '发表感想', icon: 'mdi:menu', path: '/my-customer-testimonials' },
+      { text: '会员感想', icon: 'mdi:view-list', path: '/message' },
+      { text: '发表感想', icon: 'mdi:menu', path: '/message' },
     ],
   },
   { text: '关于', icon: 'mdi:information-outline', path: '/about' },
