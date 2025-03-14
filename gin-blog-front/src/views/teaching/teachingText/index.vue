@@ -1,6 +1,8 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 
+import { storeToRefs } from 'pinia'
+
 // 无限轮播图
 import InfiniteLoading from 'v3-infinite-loading'
 
@@ -9,13 +11,15 @@ import { marked } from 'marked'
 
 import ArticleCard from './components/ArticleCard.vue'
 import TalkingCarousel from './components/TalkingCarousel.vue'
+import { useAppStore } from '@/store'
+
 import AppFooter from '@/components/layout/AppFooter.vue'
 
 import api from '@/api'
 
 const articleList = ref([])
 const loading = ref(false)
-
+// const { pageList } = storeToRefs(useAppStore())
 // 无限加载文章
 const params = reactive({ page_size: 5, page_num: 1 }) // 列表加载参数
 async function getArticlesInfinite($state) {
@@ -65,18 +69,18 @@ function backTop() {
 }
 
 // 根据后端配置动态获取封面
-const coverStyle = computed(() => {
-  const page = pageList.value.find(e => e.label === 'home')
-  // return 'background: grey center center / cover no-repeat;'
-  return page
-    ? `background: url('${page.cover}') center center / cover no-repeat;`
-    : 'background: grey center center / cover no-repeat;'
-})
+// const coverStyle = computed(() => {
+//   const page = pageList.value.find(e => e.label === 'home')
+//   // return 'background: grey center center / cover no-repeat;'
+//   return page
+//     ? `background: url('${page.cover}') center center / cover no-repeat;`
+//     : 'background: grey center center / cover no-repeat;'
+// })
 </script>
 
 <template>
   <!-- 内容 -->
-  <div class="mx-auto mb-8 mt-20 max-w-[1230px] flex flex-col justify-center px-3" :style="coverStyle">
+  <div class="mx-auto mb-8 mt-20 max-w-[1230px] flex flex-col justify-center px-3">
     <div class="grid grid-cols-12 gap-4">
       <div />
       <!-- 左半部分 -->
