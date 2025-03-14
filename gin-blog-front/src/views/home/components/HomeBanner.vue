@@ -42,7 +42,6 @@ function scrollDown() {
 const coverStyle = computed(() => {
   const page = pageList.value.find(e => e.label === 'home')
   // return 'background: grey center center / cover no-repeat;'
-  console.log(page)
   return page
     ? `background: url('${page.cover}') center center / cover no-repeat;`
     : 'background: grey center center / cover no-repeat;'

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 
 // 无限轮播图
 import InfiniteLoading from 'v3-infinite-loading'
@@ -63,11 +63,20 @@ function filterMdSymbol(md) {
 function backTop() {
   window.scrollTo({ behavior: 'smooth', top: 0 })
 }
+
+// 根据后端配置动态获取封面
+const coverStyle = computed(() => {
+  const page = pageList.value.find(e => e.label === 'home')
+  // return 'background: grey center center / cover no-repeat;'
+  return page
+    ? `background: url('${page.cover}') center center / cover no-repeat;`
+    : 'background: grey center center / cover no-repeat;'
+})
 </script>
 
 <template>
   <!-- 内容 -->
-  <div class="mx-auto mb-8 mt-20 max-w-[1230px] flex flex-col justify-center px-3">
+  <div class="mx-auto mb-8 mt-20 max-w-[1230px] flex flex-col justify-center px-3" :style="coverStyle">
     <div class="grid grid-cols-12 gap-4">
       <div />
       <!-- 左半部分 -->
