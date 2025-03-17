@@ -13,21 +13,39 @@ const { pageList } = storeToRefs(useAppStore())
 const content = ref('')
 const showBtn = ref(false)
 
-const dmRef = ref(null) // 弹幕 ref 对象
-const isHide = ref(false) // 隐藏弹幕
 const isLoop = ref(true) // 循环播放
+
+// 用于跟踪当前显示的弹幕内容，避免重复显示
+const displayingContents = ref(new Set())
 
 // 弹幕列表
 const danmus = ref([{
   avatar: 'https://www.bing.com/rp/ar_9isCNU2Q-VG1yEDDHnx8HAFQ.png',
   content: '大家好，我是作者，欢迎给我点一颗 Star!',
   nickname: '赵宇锋',
+  id: 'welcome-message', // 添加唯一标识
 }])
 
 onMounted(async () => {
   const resp = await api.getMessages()
   await nextTick()
+
   danmus.value = [...danmus.value, ...resp.data]
+
+  // 初始化弹幕组件后，添加自定义事件处理
+  if (dmRef.value) {
+    // 监听弹幕显示事件
+    dmRef.value.$el.addEventListener('danmaku-show', handleDanmakuShow)
+    // 监听弹幕结束事件
+    dmRef.value.$el.addEventListener('danmaku-end', handleDanmakuEnd)
+
+    // 将初始弹幕内容添加到displayingContents集合中
+    danmus.value.forEach((danmu) => {
+      if (danmu && danmu.content) {
+        displayingContents.value.add(danmu.content)
+      }
+    })
+  }
 })
 
 async function send() {
@@ -36,17 +54,22 @@ async function send() {
     window?.$message?.info('消息不能为空!')
     return
   }
+
+  // 检查是否已经在显示相同内容的弹幕
+  if (displayingContents.value.has(content.value)) {
+    window?.$message?.info('相同内容的弹幕已在显示中!')
+    return
+  }
+
   const data = {
     avatar: userStore.avatar,
     nickname: userStore.nickname,
     content: content.value,
+    id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // 添加唯一标识
   }
   await api.saveMessage(data)
-  dmRef.value.push(data)
   content.value = ''
 }
-
-watch(isHide, val => val ? dmRef.value.hide() : dmRef.value.show())
 
 // 根据后端配置动态获取封面
 const coverStyle = computed(() => {
@@ -80,41 +103,20 @@ const coverStyle = computed(() => {
           发送
         </button>
       </div>
-      <!-- <ul class="ml-5 text-left text-white space-y-3">
-        <li class="mt-6 flex items-center">
-          循环播放：
-          <input v-model="isLoop" type="checkbox">
-        </li>
-        <li class="space-x-3">
-          操作弹幕：
-          <button class="border-1 rounded-lg p-1 text-sm" @click="dmRef.play">
-            播放
-          </button>
-          <button class="border-1 rounded-lg p-1 text-sm" @click="dmRef.pause">
-            暂停
-          </button>
-          <button class="border-1 rounded-lg p-1 text-sm" @click="dmRef.stop">
-            停止
-          </button>
-        </li>
-        <li class="flex items-center">
-          隐藏弹幕：
-          <input v-model="isHide" type="checkbox">
-        </li>
-      </ul> -->
     </div>
     <!-- 弹幕列表 -->
     <div class="absolute inset-0 bottom-[35%] top-[60px]">
       <vue-danmaku
-        ref="dmRef"
         v-model:danmus="danmus"
         class="h-full w-full"
         use-slot
         :loop="isLoop"
-        :speeds="200"
-        :channels="0"
-        :top="5"
+        :speeds="100"
+        :channels="5"
+        :top="10"
         :is-suspend="true"
+        debounce="3000"
+        random-channel
       >
         <template #dm="{ danmu }">
           <div class="flex items-center rounded-3xl bg-#00000060 px-2 py-1 text-white lg:px-4 lg:py-2">
