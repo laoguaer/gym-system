@@ -40,14 +40,7 @@ const menuOptions = [
       { text: '健身教学短片', icon: 'mdi:menu', path: '/teachingVideo' },
     ],
   },
-  {
-    text: '客户见证',
-    icon: 'mdi:comment-quote',
-    subMenu: [
-      { text: '会员感想', icon: 'mdi:view-list', path: '/message' },
-      { text: '发表感想', icon: 'mdi:menu', path: '/message' },
-    ],
-  },
+  { text: '客户见证', icon: 'mdi:comment-quote', path: '/message' },
   { text: '关于', icon: 'mdi:information-outline', path: '/about' },
 ]
 

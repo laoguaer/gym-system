@@ -15,9 +15,6 @@ const showBtn = ref(false)
 
 const isLoop = ref(true) // 循环播放
 
-// 用于跟踪当前显示的弹幕内容，避免重复显示
-const displayingContents = ref(new Set())
-
 // 弹幕列表
 const danmus = ref([{
   avatar: 'https://www.bing.com/rp/ar_9isCNU2Q-VG1yEDDHnx8HAFQ.png',
@@ -29,23 +26,7 @@ const danmus = ref([{
 onMounted(async () => {
   const resp = await api.getMessages()
   await nextTick()
-
   danmus.value = [...danmus.value, ...resp.data]
-
-  // 初始化弹幕组件后，添加自定义事件处理
-  if (dmRef.value) {
-    // 监听弹幕显示事件
-    dmRef.value.$el.addEventListener('danmaku-show', handleDanmakuShow)
-    // 监听弹幕结束事件
-    dmRef.value.$el.addEventListener('danmaku-end', handleDanmakuEnd)
-
-    // 将初始弹幕内容添加到displayingContents集合中
-    danmus.value.forEach((danmu) => {
-      if (danmu && danmu.content) {
-        displayingContents.value.add(danmu.content)
-      }
-    })
-  }
 })
 
 async function send() {
@@ -55,19 +36,17 @@ async function send() {
     return
   }
 
-  // 检查是否已经在显示相同内容的弹幕
-  if (displayingContents.value.has(content.value)) {
-    window?.$message?.info('相同内容的弹幕已在显示中!')
-    return
-  }
-
   const data = {
     avatar: userStore.avatar,
     nickname: userStore.nickname,
     content: content.value,
-    id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // 添加唯一标识
   }
   await api.saveMessage(data)
+  danmus.value.push({
+    avatar: convertImgUrl(userStore.avatar),
+    nickname: userStore.nickname,
+    content: content.value,
+  })
   content.value = ''
 }
 
@@ -83,20 +62,20 @@ const coverStyle = computed(() => {
 <template>
   <div :style="coverStyle" class="banner-fade-down absolute inset-x-0 h-screen overflow-hidden">
     <!-- 弹幕输入框 -->
-    <div class="absolute inset-x-1 bottom-[15%] z-5 mx-auto w-1/2 animate-zoom-in border-1 rounded-3xl px-1 py-5 text-center text-light shadow-2xl">
+    <div class="absolute inset-x-1 bottom-[15%] z-5 mx-auto w-1/2 animate-zoom-in border-1 rounded-3xl px-1 py-5 text-center text-light color-red shadow-2xl">
       <h1 class="text-2xl font-bold">
         留言板
       </h1>
       <div class="mt-6 h-9 flex justify-center lg:mt-6">
         <input
           v-model="content"
-          class="w-3/4 border-1 rounded-2xl bg-transparent px-4 text-sm text-#eee outline-none"
+          class="w-3/4 border-0 rounded-2xl bg-transparent px-4 py-2 text-sm text-white shadow-inner outline-none ring-1 ring-gray-300/30 ring-inset transition-all duration-300 placeholder:text-gray-300 hover:shadow-md focus:ring-2 focus:ring-emerald-400/70"
           placeholder="说点什么吧？"
           @click.stop="showBtn = true"
           @keyup.enter="send"
         >
         <button
-          v-if="showBtn"
+          v-if="userStore.userId && showBtn"
           class="ml-3 animate-back-in-right border-1 rounded-2xl px-4"
           @click="send"
         >
@@ -115,7 +94,7 @@ const coverStyle = computed(() => {
         :channels="5"
         :top="10"
         :is-suspend="true"
-        debounce="3000"
+        :debounce="3000"
         random-channel
       >
         <template #dm="{ danmu }">
@@ -131,6 +110,15 @@ const coverStyle = computed(() => {
 
 <style scoped>
 input::-webkit-input-placeholder {
-  color: #eee;
+  color: rgba(238, 238, 238, 0.8);
+  transition: color 0.3s ease;
+}
+
+input:hover::-webkit-input-placeholder {
+  color: rgba(238, 238, 238, 1);
+}
+
+input:focus {
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 </style>
