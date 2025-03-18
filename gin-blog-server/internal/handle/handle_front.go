@@ -197,7 +197,7 @@ func (*Front) SaveMessage(c *gin.Context) {
 	isReview := model.GetConfigBool(db, g.CONFIG_IS_COMMENT_REVIEW)
 
 	info := auth.UserInfo
-	message, err := model.SaveMessage(db, info.Nickname, info.Nickname, req.Content, ipAddress, ipSource, req.Speed, isReview)
+	message, err := model.SaveMessage(db, info.Nickname, info.Avatar, req.Content, ipAddress, ipSource, req.Speed, isReview)
 	if err != nil {
 		ReturnError(c, g.ErrDbOp, err)
 		return
