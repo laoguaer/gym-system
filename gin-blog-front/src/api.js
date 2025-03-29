@@ -65,4 +65,7 @@ export default {
     }
   },
 
+  //* * 获取教练信息 */
+  getTrainerInfo: (params = {}) => request.get('/coach/list', { params }),
+
 }

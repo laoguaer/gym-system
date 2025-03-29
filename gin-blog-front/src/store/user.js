@@ -29,6 +29,7 @@ export const useUserStore = defineStore('user', {
     email: state => state.userInfo.email ?? '',
     articleLikeSet: state => state.userInfo.articleLikeSet || [],
     commentLikeSet: state => state.userInfo.commentLikeSet || [],
+    occupation: state => state.userInfo.occupation ?? '',
   },
   actions: {
     setToken(token) {
@@ -58,6 +59,7 @@ export const useUserStore = defineStore('user', {
             email: data.email,
             articleLikeSet: data.article_like_set.map(e => +e),
             commentLikeSet: data.comment_like_set.map(e => +e),
+            occupation: data.occupation,
           }
           return Promise.resolve(resp.data)
         }
