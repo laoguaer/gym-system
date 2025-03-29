@@ -15,6 +15,7 @@ type UserInfo struct {
 	Intro              string `json:"intro" gorm:"type:varchar(255)"`
 	Website            string `json:"website" gorm:"type:varchar(255)"`
 	CozeConversationId string `json:"coze_conversation_id" gorm:"type:varchar(255)"`
+	Occupation         string `json:"occupation" gorm:"type:varchar(1024)"`
 }
 
 type UserInfoVO struct {

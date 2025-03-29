@@ -30,6 +30,7 @@ var (
 	operationLogAPI handle.OperationLog // 操作日志
 	pageAPI         handle.Page         // 页面
 	chatAPI         handle.Chat         // 聊天
+	coachAPI        handle.Coach        // 教练
 	// 博客前台接口
 
 	frontAPI handle.Front // 博客前台接口汇总
@@ -180,6 +181,11 @@ func registerAdminHandler(r *gin.Engine) {
 		page.POST("", pageAPI.SaveOrUpdate) // 新增/编辑页面
 		page.DELETE("", pageAPI.Delete)     // 删除页面
 	}
+	// 教练模块
+	coach := auth.Group("/coach")
+	{
+		coach.GET("/list", coachAPI.GetList) // 教练列表
+	}
 }
 
 // 博客前台的接口: 大部分不需要登录, 部分需要登录
@@ -200,7 +206,7 @@ func registerBlogHandler(r *gin.Engine) {
 	// 视频模块
 	videos := base.Group("/video")
 	{
-		videos.GET("/list", frontAPI.GetVideoList) // 视频列表
+		videos.GET("/list", frontAPI.GetVideoList)  // 视频列表
 		videos.GET("/:id", frontAPI.GetVideoDetail) // 视频详情
 	}
 	category := base.Group("/category")
@@ -227,6 +233,10 @@ func registerBlogHandler(r *gin.Engine) {
 	chat := base.Group("/chat")
 	{
 		chat.POST("/send", chatAPI.Send) // 前台聊天列表
+	}
+	coach := base.Group("/coach")
+	{
+		coach.GET("/list", frontAPI.GetCoachList) // 前台教练列表
 	}
 
 	// 需要登录才能进行的操作
