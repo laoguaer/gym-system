@@ -54,3 +54,9 @@ func GetCoachById(db *gorm.DB, id int) (*Coach, error) {
 	result := db.Model(&coach).Where("id = ?", id).First(&coach)
 	return &coach, result.Error
 }
+
+func GetCoachWithUserIds(db *gorm.DB, ids []int) ([]Coach, error) {
+	var coach []Coach
+	err := db.Where("id IN ?", ids).Find(&coach).Error
+	return coach, err
+}
