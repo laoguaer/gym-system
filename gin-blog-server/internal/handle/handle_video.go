@@ -94,10 +94,5 @@ func (*Video) GetDetail(c *gin.Context) {
 		// CreatedAt:    "2023-01-0" + strconv.Itoa(id) + " 12:00:00",
 		// UpdatedAt:    "2023-01-0" + strconv.Itoa(id) + " 12:00:00",
 	}
-	if err != nil {
-		ReturnError(c, g.ErrDbOp, err)
-		return
-	}
-
 	ReturnSuccess(c, detail)
 }

@@ -31,6 +31,7 @@ var (
 	pageAPI         handle.Page         // 页面
 	chatAPI         handle.Chat         // 聊天
 	coachAPI        handle.Coach        // 教练
+	courseAPI       handle.Course       // 课程
 	// 博客前台接口
 
 	frontAPI handle.Front // 博客前台接口汇总
@@ -237,6 +238,12 @@ func registerBlogHandler(r *gin.Engine) {
 	coach := base.Group("/coach")
 	{
 		coach.GET("/list", frontAPI.GetCoachList) // 前台教练列表
+	}
+	course := base.Group("/course")
+	{
+		course.GET("/list", frontAPI.GetCourseList) // 前台课程列表
+		course.GET("/tags", frontAPI.GetCourseTags) // 前台课程标签列表
+		course.GET("/myCourses", courseAPI.GetUserCourseList)
 	}
 
 	// 需要登录才能进行的操作

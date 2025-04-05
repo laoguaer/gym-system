@@ -282,7 +282,7 @@ func (*Front) GetReplyListByCommentId(c *gin.Context) {
 	}
 
 	var query PageQuery
-	if err := c.ShouldBindQuery(&query); err != nil {
+	if err = c.ShouldBindQuery(&query); err != nil {
 		ReturnError(c, g.ErrRequest, err)
 		return
 	}
@@ -585,4 +585,54 @@ func substring(source string, start int, end int) string {
 		substring += string(unicodeStr[i])
 	}
 	return substring
+}
+
+type FCourseQuery struct {
+	PageQuery
+	Title    string `form:"title"`
+	CoachID  int    `form:"coach_id"`
+	IsSingle *bool  `form:"is_single"`
+}
+
+// 获取课程列表
+func (*Front) GetCourseList(c *gin.Context) {
+	var query FCourseQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		ReturnError(c, g.ErrRequest, err)
+		return
+	}
+
+	db := GetDB(c)
+
+	// 设置默认分页参数
+	if query.Page <= 0 {
+		query.Page = 1
+	}
+	if query.Size <= 0 {
+		query.Size = 10
+	}
+
+	// 调用model层获取课程列表
+	list, total, err := model.GetCourseList(db, query.Page, query.Size, query.Title, query.CoachID, 0, query.IsSingle)
+	if err != nil {
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
+
+	ReturnSuccess(c, PageResult[model.CourseVO]{
+		List:  list,
+		Total: total,
+		Size:  query.Size,
+		Page:  query.Page,
+	})
+}
+
+func (*Front) GetCourseTags(c *gin.Context) {
+	tags, err := model.GetTagsByComponent(GetDB(c), "course")
+	if err != nil {
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
+
+	ReturnSuccess(c, tags)
 }

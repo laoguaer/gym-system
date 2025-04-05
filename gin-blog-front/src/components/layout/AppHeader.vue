@@ -28,8 +28,8 @@ const menuOptions = [
     text: '课程信息',
     icon: 'mdi:gamepad-circle',
     subMenu: [
-      { text: '课程信息预览', icon: 'mdi:view-gallery', path: '/courseinfo' },
-      { text: '我的课程', icon: 'mdi:menu', path: '/mycourse' },
+      { text: '课程信息预览', icon: 'mdi:view-gallery', path: '/courseInfo' },
+      { text: '我的课程', icon: 'mdi:menu', path: '/myCourses' },
     ],
   },
   {

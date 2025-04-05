@@ -10,3 +10,4 @@ pinia.use(piniaPluginPersistedstate)
 export * from './app'
 export * from './user'
 export * from './trainer'
+export * from './course'

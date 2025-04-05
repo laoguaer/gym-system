@@ -68,4 +68,8 @@ export default {
   //* * 获取教练信息 */
   getTrainerInfo: (params = {}) => request.get('/coach/list', { params }),
 
+  //* * 获取课程列表 */
+  getCourseList: (params = {}) => request.get('/course/list', { params }),
+  getCourseTags: () => request.get('/course/tags'),
+
 }

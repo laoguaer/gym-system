@@ -71,3 +71,29 @@ func SaveOrUpdateTag(db *gorm.DB, id int, name string) (*Tag, error) {
 
 	return &tag, result.Error
 }
+
+/*
+CREATE TABLE `tag` (
+    `id` bigint NOT NULL AUTO_INCREMENT,
+    `created_at` datetime(3) DEFAULT NULL,
+    `updated_at` datetime(3) DEFAULT NULL,
+    `name` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+    `component` varchar(255) NOT NULL,
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE KEY `name` (`name`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 4 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC
+*/
+
+type TagModel struct {
+	Id int `gorm:"column:id"`
+	createdAt time.Time
+	updatedAt time.Time
+	Name string `gorm:"column:name"`
+	Component string `gorm:"column:component"`
+}
+
+func GetTagsByComponent(db *gorm.DB, component string) ([]TagModel, error) {
+	list := make([]TagModel, 0)
+	result := db.Table("tag").Where("component = ?", component).Find(&list)
+	return list, result.Error	
+}
