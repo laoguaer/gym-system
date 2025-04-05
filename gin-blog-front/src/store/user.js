@@ -42,6 +42,23 @@ export const useUserStore = defineStore('user', {
       await api.logout()
       this.$reset()
     },
+    async getMyCourseList(params = {}) {
+      if (!this.token) {
+        return []
+      }
+      try {
+        const resp = await api.getMyCourseList(params)
+        if (resp.code === 0) {
+          return Promise.resolve(resp.data)
+        }
+        else {
+          return Promise.reject(resp)
+        }
+      }
+      catch (error) {
+        return Promise.reject(error)
+      }
+    },
     async getUserInfo() {
       if (!this.token) {
         return

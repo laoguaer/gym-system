@@ -22,3 +22,4 @@ export function convertImgUrl(imgUrl) {
 
 export * from './local'
 export * from './http'
+export * from './date'
