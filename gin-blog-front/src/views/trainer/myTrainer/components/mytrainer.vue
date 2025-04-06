@@ -191,7 +191,10 @@ onMounted(async () => {
 
             <!-- 操作按钮 -->
             <div class="mt-3 flex justify-end space-x-2">
-              <button class="rounded-md bg-green-600 px-3 py-1 text-sm text-white transition duration-300 hover:bg-green-700">
+              <button
+                class="rounded-md bg-green-600 px-3 py-1 text-sm text-white transition duration-300 hover:bg-green-700"
+                @click="$router.push(`/courseInfo?coach_id=${trainer.id}`)"
+              >
                 预约课程
               </button>
               <button class="rounded-md bg-red-100 px-3 py-1 text-sm text-red-700 transition duration-300 hover:bg-red-200">

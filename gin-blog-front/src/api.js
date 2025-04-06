@@ -71,5 +71,5 @@ export default {
   //* * 获取课程列表 */
   getCourseList: (params = {}) => request.get('/course/list', { params }),
   getCourseTags: () => request.get('/course/tags'),
-  getMyCourseList: (params = {}) => request.get('/course/myCourse', { params }),
+  getMyCourseList: (params = {}) => request.get('/course/myCourses', { params }),
 }

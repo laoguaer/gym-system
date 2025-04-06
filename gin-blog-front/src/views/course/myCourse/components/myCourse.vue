@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import CourseCalendar from './CourseCalendar.vue'
 import { useUserStore } from '@/store'
 import { formatDate } from '@/utils'
 
@@ -40,7 +41,7 @@ function getCourseType(isSingle) {
 
 onMounted(async () => {
   try {
-    const result = await userStore.getMyCourseList()
+    const result = await userStore.getMyCourseList({ user_id: userStore.userId })
     courseList.value = result || []
   }
   catch (error) {
@@ -68,58 +69,68 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div v-else class="space-y-8">
-      <!-- 按教练分组显示课程 -->
-      <div v-for="group in coursesByCoach" :key="group.coach.id" class="coach-group">
-        <div class="coach-info mb-4 flex items-center">
-          <div class="mr-3 h-10 w-10 flex items-center justify-center rounded-full bg-blue-100">
-            <span class="text-blue-600 font-bold">{{ group.coach.name?.substring(0, 1) || '教' }}</span>
+    <div v-else>
+      <!-- 课程表组件 -->
+      <CourseCalendar :course-list="courseList" />
+
+      <!-- 课程列表 -->
+      <div class="my-courses-list space-y-8">
+        <h2 class="mb-4 text-xl text-gray-800 font-semibold">
+          课程列表
+        </h2>
+
+        <!-- 按教练分组显示课程 -->
+        <div v-for="group in coursesByCoach" :key="group.coach.id" class="coach-group mb-6">
+          <div class="coach-info mb-4 flex items-center">
+            <div class="mr-3 h-10 w-10 flex items-center justify-center rounded-full bg-blue-100">
+              <span class="text-blue-600 font-bold">{{ group.coach.name?.substring(0, 1) || '教' }}</span>
+            </div>
+            <h3 class="text-lg text-gray-700 font-semibold">
+              {{ group.coach.name || '未分配教练' }}
+            </h3>
           </div>
-          <h2 class="text-xl text-gray-700 font-semibold">
-            {{ group.coach.name || '未分配教练' }}
-          </h2>
-        </div>
 
-        <div class="course-list grid grid-cols-1 gap-4 lg:grid-cols-3 md:grid-cols-2">
-          <div
-            v-for="course in group.courses"
-            :key="course.id"
-            class="course-card overflow-hidden rounded-lg bg-white shadow-md transition-shadow duration-300 hover:shadow-lg"
-          >
-            <div class="p-5">
-              <div class="mb-3 flex items-start justify-between">
-                <h3 class="flex-1 truncate text-lg text-gray-800 font-semibold">
-                  {{ course.title }}
-                </h3>
-                <span
-                  class="rounded-full px-2 py-1 text-xs"
-                  :class="course.is_single === 1 ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'"
-                >
-                  {{ getCourseType(course.is_single) }}
-                </span>
-              </div>
-
-              <p class="line-clamp-2 mb-3 h-10 text-sm text-gray-600">
-                {{ course.description }}
-              </p>
-
-              <div class="mb-2 text-sm text-gray-500">
-                <i class="fas fa-clock mr-1" />
-                {{ formatCourseTime(course.start_time, course.end_time) }}
-              </div>
-
-              <div class="flex items-center justify-between">
-                <div class="flex flex-wrap gap-1">
+          <div class="course-list flex flex-nowrap gap-4 overflow-x-auto pb-2">
+            <div
+              v-for="course in group.courses"
+              :key="course.id"
+              class="course-card w-72 flex-shrink-0 overflow-hidden rounded-lg bg-white shadow-md transition-shadow duration-300 hover:shadow-lg"
+            >
+              <div class="p-5">
+                <div class="mb-3 flex items-start justify-between">
+                  <h4 class="flex-1 truncate text-lg text-gray-800 font-semibold">
+                    {{ course.title }}
+                  </h4>
                   <span
-                    v-for="(tag, index) in course.tag_list"
-                    :key="index"
-                    class="rounded bg-gray-100 px-2 py-1 text-xs text-gray-600"
+                    class="rounded-full px-2 py-1 text-xs"
+                    :class="course.is_single === 1 ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'"
                   >
-                    {{ tag }}
+                    {{ getCourseType(course.is_single) }}
                   </span>
                 </div>
-                <div class="text-sm text-blue-600 font-medium">
-                  已使用: {{ course.use_cnt }} 次
+
+                <p class="line-clamp-2 mb-3 h-10 text-sm text-gray-600">
+                  {{ course.description }}
+                </p>
+
+                <div v-if="course.is_single === 0" class="mb-2 text-sm text-gray-500">
+                  <i class="fas fa-clock mr-1" />
+                  {{ formatCourseTime(course.start_time, course.end_time) }}
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div class="flex flex-wrap gap-1">
+                    <span
+                      v-for="(tag, index) in course.tag_list"
+                      :key="index"
+                      class="rounded bg-gray-100 px-2 py-1 text-xs text-gray-600"
+                    >
+                      {{ tag }}
+                    </span>
+                  </div>
+                  <div class="text-sm text-blue-600 font-medium">
+                    已使用: {{ course.use_cnt }} 次
+                  </div>
                 </div>
               </div>
             </div>
@@ -144,5 +155,23 @@ onMounted(async () => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.course-list {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.course-list::-webkit-scrollbar {
+  height: 6px;
+}
+
+.course-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.course-list::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
 }
 </style>

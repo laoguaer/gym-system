@@ -114,7 +114,10 @@ onMounted(async () => {
             {{ trainer.intro }}
           </p>
 
-          <button class="mt-2 w-full rounded-lg bg-blue-600 py-1 text-sm text-white transition duration-300 hover:bg-blue-700">
+          <button 
+            class="mt-2 w-full rounded-lg bg-blue-600 py-1 text-sm text-white transition duration-300 hover:bg-blue-700"
+            @click="$router.push(`/courseInfo?coach_id=${trainer.id}`)"
+          >
             预约课程
           </button>
         </div>

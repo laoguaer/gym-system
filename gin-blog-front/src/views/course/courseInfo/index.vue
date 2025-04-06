@@ -1,11 +1,16 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useRoute } from 'vue-router'
 import { useCourseStore } from '@/store/course'
+import { useTrainerStore } from '@/store/trainer'
 import AppFooter from '@/components/layout/AppFooter.vue'
 
+const route = useRoute()
 const courseStore = useCourseStore()
 const { loading, error, courses, courseCount } = storeToRefs(courseStore)
+
+const trainerStore = useTrainerStore()
 
 // 搜索条件
 const searchForm = ref({
@@ -73,7 +78,15 @@ onMounted(async () => {
   // 获取教练列表和标签列表
   await Promise.all([
     courseStore.getTagList(),
+    trainerStore.getTrainerList(),
   ])
+
+  // 检查URL参数中是否包含coach_id
+  const coachId = route.query.coach_id
+  if (coachId) {
+    searchForm.value.coach_id = Number(coachId)
+  }
+
   // 获取课程列表
   await fetchCourses()
 })
@@ -111,7 +124,7 @@ onMounted(async () => {
               <option :value="null">
                 全部教练
               </option>
-              <option v-for="coach in courseStore.coaches" :key="coach.id" :value="coach.id">
+              <option v-for="coach in trainerStore.trainers" :key="coach.id" :value="coach.id">
                 {{ coach.name }}
               </option>
             </select>
@@ -210,7 +223,7 @@ onMounted(async () => {
                 <span>课程类型:</span>
                 <span class="text-gray-700 font-medium">{{ course.is_single ? '单人课程' : '团体课程' }}</span>
               </p>
-              <p class="flex justify-between">
+              <p v-if="course.is_single === 0" class="flex justify-between">
                 <span>人数上限:</span>
                 <span class="text-gray-700 font-medium">{{ course.max_capacity }}人</span>
               </p>
