@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type Course struct{}
@@ -23,13 +24,14 @@ type UserCourseVo struct {
 	Coach       *model.Coach `json:"coach,omitempty"`
 	TagList     []string     `json:"tag_list,omitempty"`
 	UseCnt      int          `json:"use_cnt"`
+	BuyCnt      int          `json:"buy_cnt"`
 }
 
 type GetUserCourseListQuery struct {
 	UserID int `form:"user_id" binding:"required,min=1"`
 }
 
-func(*Course) GetUserCourseList(c *gin.Context) {
+func (*Course) GetUserCourseList(c *gin.Context) {
 	var query GetUserCourseListQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
 		ReturnError(c, g.ErrRequest, err)
@@ -42,6 +44,8 @@ func(*Course) GetUserCourseList(c *gin.Context) {
 	}
 	courseList := make([]UserCourseVo, 0)
 	for _, reservation := range reservations {
+		// 记录请求和响应信息
+		zap.L().Debug("reservation", zap.Any("reservation", reservation))
 		course, err := model.GetCourseById(GetDB(c), reservation.CourseID)
 		if err != nil {
 			ReturnError(c, g.ErrDbOp, err)
@@ -55,9 +59,10 @@ func(*Course) GetUserCourseList(c *gin.Context) {
 			EndTime:     course.EndTime,
 			CoachID:     course.CoachID,
 			IsSingle:    course.IsSingle,
-			UseCnt:      reservation.UseCnt,
 			TagList:     course.TagList,
 			Coach:       course.Coach,
+			UseCnt:      reservation.UseCnt,
+			BuyCnt:      reservation.BuyCnt,
 		})
 	}
 	ReturnSuccess(c, courseList)

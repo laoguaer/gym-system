@@ -636,3 +636,4 @@ func (*Front) GetCourseTags(c *gin.Context) {
 
 	ReturnSuccess(c, tags)
 }
+
