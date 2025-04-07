@@ -38,18 +38,19 @@ func GetReservationByUserId(db *gorm.DB, userID int) ([]Reservation, error) {
 // ) ENGINE = InnoDB AUTO_INCREMENT = 2 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
 
 type Booking struct {
-	id        int `gorm:"primaryKey"`
-	UserID    int `gorm:"not null"`
-	CourseID  int `gorm:"not null"`
-	StartTime time.Time
-	EndTime   time.Time
-	Status    int `gorm:"not null;default:0"`
-	CreatedAt time.Time
+	id          int `gorm:"primaryKey"`
+	UserID      int `gorm:"not null"`
+	CourseID    int `gorm:"not null"`
+	StartTime   time.Time
+	EndTime     time.Time
+	Status      int    `gorm:"not null;default:0"`
+	CourseTitle string `gorm:"not null"`
+	CreatedAt   time.Time
 }
 
 func GetBookingByUserId(db *gorm.DB, userID int) ([]Booking, error) {
 	var bookings []Booking
-	if err := db.Where("user_id =?", userID).Find(&bookings).Error; err != nil {
+	if err := db.Where("user_id =?", userID).Order("start_time").Find(&bookings).Error; err != nil {
 		return nil, err
 	}
 	return bookings, nil
@@ -57,7 +58,7 @@ func GetBookingByUserId(db *gorm.DB, userID int) ([]Booking, error) {
 
 func GetBookingByUserIdAndTime(db *gorm.DB, userID int, dayTime time.Time) ([]Booking, error) {
 	var bookings []Booking
-	if err := db.Where("user_id =? AND DATE(start_time) = ?", userID, dayTime).Find(&bookings).Error; err != nil {
+	if err := db.Debug().Where("user_id =? AND DATE(start_time) = DATE(?)", userID, dayTime).Order("start_time").Find(&bookings).Error; err != nil {
 		return nil, err
 	}
 	return bookings, nil

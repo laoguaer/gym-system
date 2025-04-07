@@ -6,6 +6,7 @@ import { formatDate } from '@/utils'
 
 const userStore = useUserStore()
 const courseList = ref([])
+const bookingList = ref([])
 const loading = ref(true)
 
 // 按教练分组的课程列表
@@ -41,11 +42,16 @@ function getCourseType(isSingle) {
 
 onMounted(async () => {
   try {
-    const result = await userStore.getMyCourseList({ user_id: userStore.userId })
-    courseList.value = result || []
+    // 获取课程列表
+    const courseResult = await userStore.getMyCourseList({ user_id: userStore.userId })
+    courseList.value = courseResult || []
+
+    // 获取预约记录
+    const bookingResult = await userStore.getMyBookings({ user_id: userStore.userId })
+    bookingList.value = bookingResult || []
   }
   catch (error) {
-    console.error('获取课程列表失败:', error)
+    console.error('获取数据失败:', error)
   }
   finally {
     loading.value = false
@@ -71,12 +77,12 @@ onMounted(async () => {
 
     <div v-else>
       <!-- 课程表组件 -->
-      <CourseCalendar :course-list="courseList" />
+      <CourseCalendar v-model:booking-list="bookingList" />
 
       <!-- 课程列表 -->
       <div class="my-courses-list space-y-8">
         <h2 class="mb-4 text-xl text-gray-800 font-semibold">
-          课程列表
+          已购买的课程列表
         </h2>
 
         <!-- 按教练分组显示课程 -->
@@ -127,6 +133,9 @@ onMounted(async () => {
                     >
                       {{ tag }}
                     </span>
+                  </div>
+                  <div class="text-sm text-blue-600 font-medium">
+                    购买次数: {{ course.buy_cnt }} 次
                   </div>
                   <div class="text-sm text-blue-600 font-medium">
                     已使用: {{ course.use_cnt }} 次

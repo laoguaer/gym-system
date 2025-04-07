@@ -59,6 +59,40 @@ export const useUserStore = defineStore('user', {
         return Promise.reject(error)
       }
     },
+    async getMyBookings(params = {}) {
+      if (!this.token) {
+        return []
+      }
+      try {
+        const resp = await api.getMyBookings(params)
+        if (resp.code === 0) {
+          return Promise.resolve(resp.data)
+        }
+        else {
+          return Promise.reject(resp)
+        }
+      }
+      catch (error) {
+        return Promise.reject(error)
+      }
+    },
+    async getUserBookingWithDay(params = {}) {
+      if (!this.token) {
+        return []
+      }
+      try {
+        const resp = await api.getUserBookingWithDay(params)
+        if (resp.code === 0) {
+          return Promise.resolve(resp.data)
+        }
+        else {
+          return Promise.reject(resp)
+        }
+      }
+      catch (error) {
+        return Promise.reject(error)
+      }
+    },
     async getUserInfo() {
       if (!this.token) {
         return

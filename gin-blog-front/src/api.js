@@ -72,4 +72,5 @@ export default {
   getCourseList: (params = {}) => request.get('/course/list', { params }),
   getCourseTags: () => request.get('/course/tags'),
   getMyCourseList: (params = {}) => request.get('/course/myCourses', { params }),
+  getUserBookingWithDay: (params = {}) => request.get('/booking/myBookings', { params, needToken: true }),
 }
