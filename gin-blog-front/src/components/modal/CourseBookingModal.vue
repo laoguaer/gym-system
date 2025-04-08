@@ -38,7 +38,7 @@ function formatDateTime(dateTimeStr) {
 // 确认购买
 async function confirmBooking() {
   // 检查是否登录
-  if (!userStore.token) {
+  if (!userStore.id) {
     // 未登录，显示登录框
     appStore.setLoginFlag(true)
     return

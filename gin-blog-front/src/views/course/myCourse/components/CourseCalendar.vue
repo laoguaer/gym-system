@@ -176,12 +176,13 @@ function getStatusClass(status) {
 }
 
 // 取消预约
-async function cancelBooking(bookingId) {
+async function cancelBooking(booking) {
   try {
+    console.log(booking)
     // 调用取消预约API
     const response = await api.cancelBooking({
       user_id: userStore.userId,
-      booking_id: bookingId,
+      booking_id: booking.Id,
     })
 
     if (response.code !== 0) {
@@ -271,7 +272,7 @@ initCurrentWeek()
       <div v-else class="course-list space-y-3">
         <div
           v-for="booking in selectedDateCourses"
-          :key="booking.id"
+          :key="booking.Id"
           class="course-item border border-gray-100 rounded-lg bg-white p-3 shadow-sm"
         >
           <div class="flex items-start justify-between">
@@ -301,7 +302,7 @@ initCurrentWeek()
             <div v-if="booking.Status === 0" class="mt-3 flex justify-end">
               <button
                 class="rounded-md bg-red-500 px-3 py-1 text-xs text-white font-medium transition-colors hover:bg-red-600"
-                @click="cancelBooking(booking.ID)"
+                @click="cancelBooking(booking)"
               >
                 取消预约
               </button>

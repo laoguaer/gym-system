@@ -65,12 +65,12 @@ func (*Booking) CancleBooking(c *gin.Context) {
 			return err
 		}
 		// 取消预约
-		if err := model.CancleBooking(GetDB(c), body.BookingID); err != nil {
+		if err := model.CancleBookingAndSubUseCnt(GetDB(c), body.BookingID); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return err
 		}
 		// 减少useCnt
-		
+
 		return nil
 	}); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
