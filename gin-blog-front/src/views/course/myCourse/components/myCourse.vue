@@ -1,13 +1,19 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import CourseCalendar from './CourseCalendar.vue'
-import { useUserStore } from '@/store'
+import { useAppStore, useUserStore } from '@/store'
 import { formatDate } from '@/utils'
+import CourseBookingModal from '@/components/modal/CourseBookingModal.vue'
 
 const userStore = useUserStore()
+const appStore = useAppStore()
 const courseList = ref([])
 const bookingList = ref([])
 const loading = ref(true)
+
+// 控制预约模态框
+const showBookingModal = ref(false)
+const selectedCourse = ref(null)
 
 // 按教练分组的课程列表
 const coursesByCoach = computed(() => {
@@ -40,6 +46,33 @@ function getCourseType(isSingle) {
   return isSingle === 1 ? '私教课' : '团体课'
 }
 
+// 打开预约模态框
+function openBookingModal(course) {
+  // 检查是否登录
+  if (!userStore.token) {
+    appStore.setLoginFlag(true)
+    return
+  }
+  selectedCourse.value = course
+  showBookingModal.value = true
+}
+
+// 预约成功后刷新数据
+async function refreshData() {
+  try {
+    // 获取课程列表
+    const courseResult = await userStore.getMyCourseList({ user_id: userStore.userId })
+    courseList.value = courseResult || []
+
+    // 获取预约记录
+    const bookingResult = await userStore.getMyBookings({ user_id: userStore.userId })
+    bookingList.value = bookingResult || []
+  }
+  catch (error) {
+    console.error('获取数据失败:', error)
+  }
+}
+
 onMounted(async () => {
   try {
     // 获取课程列表
@@ -61,6 +94,12 @@ onMounted(async () => {
 
 <template>
   <div class="my-course-container">
+    <!-- 预约模态框 -->
+    <CourseBookingModal
+      v-model="showBookingModal"
+      :course="selectedCourse"
+      @booking-success="refreshData"
+    />
     <h1 class="mb-6 text-2xl text-gray-800 font-bold">
       我的课程
     </h1>
@@ -77,7 +116,7 @@ onMounted(async () => {
 
     <div v-else>
       <!-- 课程表组件 -->
-      <CourseCalendar v-model:booking-list="bookingList" />
+      <CourseCalendar v-model:booking-list="bookingList" @refresh="refreshData" />
 
       <!-- 课程列表 -->
       <div class="my-courses-list space-y-8">
@@ -125,21 +164,22 @@ onMounted(async () => {
                 </div>
 
                 <div class="flex items-center justify-between">
-                  <div class="flex flex-wrap gap-1">
-                    <span
-                      v-for="(tag, index) in course.tag_list"
-                      :key="index"
-                      class="rounded bg-gray-100 px-2 py-1 text-xs text-gray-600"
-                    >
-                      {{ tag }}
-                    </span>
-                  </div>
                   <div class="text-sm text-blue-600 font-medium">
                     购买次数: {{ course.buy_cnt }} 次
                   </div>
                   <div class="text-sm text-blue-600 font-medium">
                     已使用: {{ course.use_cnt }} 次
                   </div>
+                </div>
+
+                <!-- 预约按钮 -->
+                <div class="mt-3 border-t border-gray-100 pt-3">
+                  <button
+                    class="w-full rounded-md bg-blue-600 px-3 py-2 text-sm text-white font-medium transition-colors hover:bg-blue-700"
+                    @click="openBookingModal(course)"
+                  >
+                    预约课程
+                  </button>
                 </div>
               </div>
             </div>

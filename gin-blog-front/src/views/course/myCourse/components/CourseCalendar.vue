@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { formatDate } from '@/utils'
 import { useUserStore } from '@/store'
+import api from '@/api'
 
 const props = defineProps({
   bookingList: {
@@ -10,7 +11,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:bookingList'])
+const emit = defineEmits(['update:bookingList', 'refresh'])
 
 const userStore = useUserStore()
 
@@ -174,6 +175,33 @@ function getStatusClass(status) {
   return classMap[status] || 'bg-gray-100 text-gray-700'
 }
 
+// 取消预约
+async function cancelBooking(bookingId) {
+  try {
+    // 调用取消预约API
+    const response = await api.cancelBooking({
+      user_id: userStore.userId,
+      booking_id: bookingId,
+    })
+
+    if (response.code !== 0) {
+      throw new Error('取消预约失败')
+    }
+
+    // 提示成功
+    window.$notify?.success('预约已取消!')
+
+    // 重新获取当天预约
+    await fetchDayBookings(selectedDate.value)
+
+    // 通知父组件刷新数据
+    emit('refresh')
+  }
+  catch (error) {
+    window.$notify?.error(`取消失败: ${error.message || '未知错误'}`)
+  }
+}
+
 // 监听selectedDate变化，更新日历选中状态
 watch(selectedDate, () => {
   generateWeekDays()
@@ -267,6 +295,16 @@ initCurrentWeek()
             <div class="mt-1 flex items-center">
               <i class="fas fa-calendar-check mr-1" />
               预约时间: {{ formatDate(booking.CreatedAt, 'YYYY-MM-DD HH:mm') }}
+            </div>
+
+            <!-- 取消预约按钮 -->
+            <div v-if="booking.Status === 0" class="mt-3 flex justify-end">
+              <button
+                class="rounded-md bg-red-500 px-3 py-1 text-xs text-white font-medium transition-colors hover:bg-red-600"
+                @click="cancelBooking(booking.ID)"
+              >
+                取消预约
+              </button>
             </div>
           </div>
         </div>

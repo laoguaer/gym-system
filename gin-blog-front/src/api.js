@@ -72,5 +72,10 @@ export default {
   getCourseList: (params = {}) => request.get('/course/list', { params }),
   getCourseTags: () => request.get('/course/tags'),
   getMyCourseList: (params = {}) => request.get('/course/myCourses', { params }),
+  //* * 购买课程 */
+  buyCourse: (data = {}) => request.post('/course/buyCourse', data, { needToken: true }),
+  // 获取预约信息
   getUserBookingWithDay: (params = {}) => request.get('/booking/myBookings', { params, needToken: true }),
+  // 取消预约
+  cancelBooking: (data = {}) => request.post('/booking/cancelBooking', data, { needToken: true }),
 }

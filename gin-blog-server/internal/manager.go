@@ -245,10 +245,12 @@ func registerBlogHandler(r *gin.Engine) {
 		course.GET("/list", frontAPI.GetCourseList) // 前台课程列表
 		course.GET("/tags", frontAPI.GetCourseTags) // 前台课程标签列表
 		course.GET("/myCourses", courseAPI.GetUserCourseList)
+		course.POST("/buyCourse", courseAPI.BuyCourse) // 前台购买课程
 	}
 	booking := base.Group("/booking")
 	{
 		booking.GET("/myBookings", bookingApi.GetUserBookingWithDay) // 前台预约列表
+		booking.POST("/cancelBooking", bookingApi.CancleBooking)     // 前台取消预约
 	}
 
 	// 需要登录才能进行的操作

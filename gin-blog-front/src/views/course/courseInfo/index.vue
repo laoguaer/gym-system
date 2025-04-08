@@ -4,13 +4,21 @@ import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import { useCourseStore } from '@/store/course'
 import { useTrainerStore } from '@/store/trainer'
+import { useAppStore, useUserStore } from '@/store'
 import AppFooter from '@/components/layout/AppFooter.vue'
+import CourseBookingModal from '@/components/modal/CourseBookingModal.vue'
 
 const route = useRoute()
 const courseStore = useCourseStore()
 const { loading, error, courses, courseCount } = storeToRefs(courseStore)
 
 const trainerStore = useTrainerStore()
+const userStore = useUserStore()
+const appStore = useAppStore()
+
+// 控制购买课程模态框
+const showBookingModal = ref(false)
+const selectedCourse = ref(null)
 
 // 搜索条件
 const searchForm = ref({
@@ -72,6 +80,25 @@ watch(
   },
   { deep: true },
 )
+
+// 打开购买课程模态框
+function openBookingModal(course) {
+  // 检查是否登录
+  if (!userStore.userId) {
+    // 未登录，显示登录框
+    appStore.setLoginFlag(true)
+    return
+  }
+
+  selectedCourse.value = course
+  showBookingModal.value = true
+}
+
+// 处理购买成功
+function handleBookingSuccess() {
+  // 刷新课程列表
+  fetchCourses()
+}
 
 // 初始化
 onMounted(async () => {
@@ -237,9 +264,12 @@ onMounted(async () => {
               </p>
             </div>
 
-            <!-- 预约按钮 -->
-            <button class="mt-4 w-full rounded-lg bg-blue-600 py-2 text-sm text-white transition duration-300 hover:bg-blue-700">
-              预约课程
+            <!-- 购买按钮 -->
+            <button
+              class="mt-4 w-full rounded-lg bg-blue-600 py-2 text-sm text-white transition duration-300 hover:bg-blue-700"
+              @click="openBookingModal(course)"
+            >
+              购买课程
             </button>
           </div>
         </div>
@@ -335,6 +365,13 @@ onMounted(async () => {
       </div>
     </div>
   </main>
+
+  <!-- 课程购买模态框 -->
+  <CourseBookingModal
+    v-model="showBookingModal"
+    :course="selectedCourse"
+    @booking-success="handleBookingSuccess"
+  />
 
   <AppFooter />
 </template>
