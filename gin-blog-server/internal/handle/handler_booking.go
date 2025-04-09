@@ -80,3 +80,38 @@ func (*Booking) CancleBooking(c *gin.Context) {
 
 	ReturnSuccess(c, nil)
 }
+
+type GetAvailableBookingTimeQuery struct {
+	Day      string `form:"date" binding:"required"`
+	CourseID int    `form:"course_id" binding:"required"`
+}
+
+func (*Booking) GetAvailableBookingTime(c *gin.Context) {
+	var query GetAvailableBookingTimeQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	dayTime, err := time.Parse("2006-01-02", query.Day)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	course, err := model.GetCourseById(GetDB(c), query.CourseID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if course == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "course not found"})
+		return
+	}
+
+	// 计算可用时间
+	availableTime := []string{}
+	for i := 10; i < 22; i++ {
+		hourTime := time.Date(dayTime.Year(), dayTime.Month(), dayTime.Day(), i, 0, 0, 0, time.Local)
+		availableTime = append(availableTime, hourTime.Format("2006-01-02 15:04:05"))
+	}
+	ReturnSuccess(c, availableTime)
+}

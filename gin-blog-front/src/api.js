@@ -78,4 +78,8 @@ export default {
   getUserBookingWithDay: (params = {}) => request.get('/booking/myBookings', { params, needToken: true }),
   // 取消预约
   cancelBooking: (data = {}) => request.post('/booking/cancelBooking', data, { needToken: true }),
+  // 获取可用时间段
+  getAvailableTimeSlots: (params = {}) => request.get('/booking/availableTime', { params, needToken: true }),
+  // 预约课程
+  bookCourse: (data = {}) => request.post('/booking/book', data, { needToken: true }),
 }

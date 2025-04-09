@@ -1,7 +1,8 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import UModal from '@/components/ui/UModal.vue'
 import { useAppStore, useUserStore } from '@/store'
+import { formatDate } from '@/utils'
 import api from '@/api'
 
 const props = defineProps({
@@ -26,63 +27,160 @@ const showModal = computed({
   set: val => emit('update:modelValue', val),
 })
 
-// 购买次数
-const bookingCount = ref(1)
+// 预约相关状态
+const selectedDate = ref(new Date()) // 选择的日期
+const availableTimeSlots = ref([]) // 可用时间段
+const selectedTimeSlot = ref(null) // 选择的时间段
+const loading = ref(false) // 加载状态
 
-// 格式化日期时间
-function formatDateTime(dateTimeStr) {
-  const date = new Date(dateTimeStr)
-  return `${date.toLocaleDateString()} ${date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`
+// 生成未来15天的日期选项
+const dateOptions = computed(() => {
+  const options = []
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  for (let i = 0; i < 15; i++) {
+    const date = new Date(today)
+    date.setDate(today.getDate() + i)
+    options.push({
+      date,
+      label: `${formatDate(date, 'MM月DD日')} (${getWeekDay(date)})`,
+    })
+  }
+
+  return options
+})
+
+// 获取星期几
+function getWeekDay(date) {
+  const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+  return weekDays[date.getDay()]
 }
 
-// 确认购买
+// 选择日期后获取可用时间段
+async function fetchAvailableTimeSlots() {
+  if (!selectedDate.value)
+    return
+
+  loading.value = true
+  try {
+    // 调用接口获取可用时间段
+    const response = await api.getAvailableTimeSlots({
+      date: formatDate(selectedDate.value, 'YYYY-MM-DD'),
+      course_id: props.course.id,
+    })
+
+    if (response.code !== 0) {
+      throw new Error('获取可用时间段失败')
+    }
+
+    // 生成10点到20点的时间段
+    const timeSlots = []
+    for (let hour = 10; hour < 20; hour++) {
+      const startTime = new Date(selectedDate.value)
+      startTime.setHours(hour, 0, 0)
+
+      const endTime = new Date(selectedDate.value)
+      endTime.setHours(hour + 1, 0, 0)
+
+      // 检查时间段是否可用
+      const isAvailable = response.data.some((timeStr) => {
+        const slotStart = new Date(timeStr)
+        return slotStart.getHours() === hour
+      })
+
+      timeSlots.push({
+        startTime,
+        endTime,
+        label: `${hour}:00 - ${hour + 1}:00`,
+        isAvailable,
+      })
+    }
+
+    availableTimeSlots.value = timeSlots
+    // 重置选择的时间段
+    selectedTimeSlot.value = null
+  }
+  catch (error) {
+    console.error('获取可用时间段失败:', error)
+    window.$notify?.error(`获取可用时间段失败: ${error.message || '未知错误'}`)
+  }
+  finally {
+    loading.value = false
+  }
+}
+
+// 确认预约
 async function confirmBooking() {
   // 检查是否登录
-  if (!userStore.id) {
+  if (!userStore.token) {
     // 未登录，显示登录框
     appStore.setLoginFlag(true)
     return
   }
 
-  try {
-    // 调用课程预约/购买API
-    const response = await api.buyCourse({
-      course_id: props.course.id,
-      count: bookingCount.value,
-      user_id: userStore.userId,
-    })
-    if (response.code !== 0) {
-      throw new Error('购买失败')
-    }
-    // 购买成功提示
-    window.$notify?.success('课程购买成功!')
+  // 检查是否选择了时间段
+  if (!selectedTimeSlot.value) {
+    window.$notify?.error('请选择预约时间段')
+    return
+  }
 
-    // 重置购买次数
-    bookingCount.value = 1
+  loading.value = true
+  try {
+    // 调用预约API
+    const response = await api.bookCourse({
+      user_id: userStore.userId,
+      course_id: props.course.id,
+      start_time: formatDate(selectedTimeSlot.value.startTime, 'YYYY-MM-DD HH:mm:ss'),
+      end_time: formatDate(selectedTimeSlot.value.endTime, 'YYYY-MM-DD HH:mm:ss'),
+    })
+
+    if (response.code !== 0) {
+      throw new Error('预约失败')
+    }
+
+    // 预约成功提示
+    window.$notify?.success('课程预约成功!')
 
     // 关闭模态框
     showModal.value = false
 
-    // 触发购买成功事件
+    // 触发预约成功事件
     emit('bookingSuccess')
   }
   catch (error) {
-    window.$notify?.error(`购买失败: ${error.message || '未知错误'}`)
+    window.$notify?.error(`预约失败: ${error.message || '未知错误'}`)
+  }
+  finally {
+    loading.value = false
   }
 }
 
-// 取消购买
+// 取消预约
 function cancelBooking() {
-  bookingCount.value = 1
+  selectedDate.value = new Date()
+  selectedTimeSlot.value = null
   showModal.value = false
 }
+
+// 监听日期变化，获取可用时间段
+watch(selectedDate, () => {
+  fetchAvailableTimeSlots()
+})
+
+// 初始化
+onMounted(() => {
+  // 默认选择今天，并获取可用时间段
+  selectedDate.value = new Date()
+  fetchAvailableTimeSlots()
+})
 </script>
 
 <template>
   <UModal v-model="showModal" :width="480">
     <div class="mx-2 my-1">
       <div class="mb-4 text-xl font-bold">
-        购买课程
+        预约课程
       </div>
 
       <!-- 课程信息 -->
@@ -114,26 +212,44 @@ function cancelBooking() {
             <span>人数上限:</span>
             <span class="font-medium">{{ course.max_capacity }}人</span>
           </p>
-          <p class="flex justify-between">
-            <span>开始时间:</span>
-            <span class="font-medium">{{ formatDateTime(course.start_time) }}</span>
-          </p>
-          <p class="flex justify-between">
-            <span>结束时间:</span>
-            <span class="font-medium">{{ formatDateTime(course.end_time) }}</span>
-          </p>
         </div>
       </div>
 
-      <!-- 购买次数输入 -->
+      <!-- 日期选择 -->
       <div class="mb-4">
-        <label class="mb-1 block text-sm text-gray-700 font-medium">购买次数</label>
-        <input
-          v-model.number="bookingCount"
-          type="number"
-          min="1"
+        <label class="mb-1 block text-sm text-gray-700 font-medium">选择日期</label>
+        <select
+          v-model="selectedDate"
           class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         >
+          <option v-for="option in dateOptions" :key="option.label" :value="option.date">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+
+      <!-- 时间段选择 -->
+      <div class="mb-4">
+        <label class="mb-1 block text-sm text-gray-700 font-medium">选择时间段</label>
+        <div v-if="loading" class="flex justify-center py-4">
+          <div class="h-6 w-6 animate-spin border-b-2 border-blue-500 rounded-full" />
+        </div>
+        <div v-else class="grid grid-cols-3 gap-2">
+          <button
+            v-for="slot in availableTimeSlots"
+            :key="slot.label"
+            class="border rounded-md px-3 py-2 text-sm font-medium transition-colors"
+            :class="{
+              'border-blue-500 bg-blue-50 text-blue-700': selectedTimeSlot === slot,
+              'border-gray-300 bg-white text-gray-700 hover:bg-gray-50': selectedTimeSlot !== slot && slot.isAvailable,
+              'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed': !slot.isAvailable,
+            }"
+            :disabled="!slot.isAvailable"
+            @click="selectedTimeSlot = slot"
+          >
+            {{ slot.label }}
+          </button>
+        </div>
       </div>
 
       <!-- 按钮 -->
@@ -142,13 +258,14 @@ function cancelBooking() {
           class="border border-gray-300 rounded-md bg-white px-4 py-2 text-sm text-gray-700 font-medium hover:bg-gray-50"
           @click="cancelBooking"
         >
-          返回
+          取消
         </button>
         <button
           class="rounded-md bg-blue-600 px-4 py-2 text-sm text-white font-medium hover:bg-blue-700"
+          :disabled="loading || !selectedTimeSlot"
           @click="confirmBooking"
         >
-          确认购买
+          确认预约
         </button>
       </div>
     </div>
