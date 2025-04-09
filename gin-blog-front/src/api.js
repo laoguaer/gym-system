@@ -75,7 +75,7 @@ export default {
   //* * 购买课程 */
   buyCourse: (data = {}) => request.post('/course/buyCourse', data, { needToken: true }),
   // 获取预约信息
-  getUserBookingWithDay: (params = {}) => request.get('/booking/myBookings', { params, needToken: true }),
+  getUserBookingWithDay: (params = {}) => request.get('/booking/myBookingsWithDay', { params, needToken: true }),
   // 取消预约
   cancelBooking: (data = {}) => request.post('/booking/cancelBooking', data, { needToken: true }),
   // 获取可用时间段

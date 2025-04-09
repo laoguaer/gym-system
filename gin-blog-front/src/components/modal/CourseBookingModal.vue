@@ -62,6 +62,12 @@ async function fetchAvailableTimeSlots() {
   if (!selectedDate.value)
     return
 
+  // 检查course是否存在且有id属性
+  if (!props.course || !props.course.id) {
+    loading.value = false
+    return
+  }
+
   loading.value = true
   try {
     // 调用接口获取可用时间段
@@ -172,7 +178,10 @@ watch(selectedDate, () => {
 onMounted(() => {
   // 默认选择今天，并获取可用时间段
   selectedDate.value = new Date()
-  fetchAvailableTimeSlots()
+  // 只有当course存在且有id时才获取可用时间段
+  if (props.course && props.course.id) {
+    fetchAvailableTimeSlots()
+  }
 })
 </script>
 

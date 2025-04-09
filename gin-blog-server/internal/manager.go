@@ -249,7 +249,7 @@ func registerBlogHandler(r *gin.Engine) {
 	}
 	booking := base.Group("/booking")
 	{
-		booking.GET("/myBookings", bookingApi.GetUserBookingWithDay) // 前台预约列表
+		booking.GET("/myBookingsWithDay", bookingApi.GetUserBookingWithDay) // 前台预约列表
 		booking.POST("/cancelBooking", bookingApi.CancleBooking)     // 前台取消预约
 		booking.GET("/availableTime", bookingApi.GetAvailableBookingTime)
 	}

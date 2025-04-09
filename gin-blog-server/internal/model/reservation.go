@@ -75,6 +75,7 @@ type Booking struct {
 	Id          int `gorm:"primaryKey"`
 	UserID      int `gorm:"not null"`
 	CourseID    int `gorm:"not null"`
+	CoachID     int `gorm:"not null"`
 	StartTime   time.Time
 	EndTime     time.Time
 	Status      int    `gorm:"not null;default:0"`

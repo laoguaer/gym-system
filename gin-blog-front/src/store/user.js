@@ -64,7 +64,7 @@ export const useUserStore = defineStore('user', {
         return []
       }
       try {
-        const resp = await api.getMyBookings(params)
+        const resp = await api.getUserBookingWithDay(params)
         if (resp.code === 0) {
           return Promise.resolve(resp.data)
         }

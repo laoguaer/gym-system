@@ -65,7 +65,7 @@ async function refreshData() {
     courseList.value = courseResult || []
 
     // 获取预约记录
-    const bookingResult = await userStore.getMyBookings({ user_id: userStore.userId })
+    // const bookingResult = await userStore.getMyBookings({ user_id: userStore.userId })
     bookingList.value = bookingResult || []
   }
   catch (error) {
@@ -80,8 +80,8 @@ onMounted(async () => {
     courseList.value = courseResult || []
 
     // 获取预约记录
-    const bookingResult = await userStore.getMyBookings({ user_id: userStore.userId })
-    bookingList.value = bookingResult || []
+    // const bookingResult = await userStore.getUserBookingWithDay({ user_id: userStore.userId })
+    // bookingList.value = bookingResult || []
   }
   catch (error) {
     console.error('获取数据失败:', error)

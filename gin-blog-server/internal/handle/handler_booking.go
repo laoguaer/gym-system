@@ -115,3 +115,34 @@ func (*Booking) GetAvailableBookingTime(c *gin.Context) {
 	}
 	ReturnSuccess(c, availableTime)
 }
+
+type BookingBody struct {
+	UserID    int    `json:"user_id" binding:"required,min=1"`
+	CourseID  int    `json:"course_id" binding:"required,min=1"`
+	StartTime string `json:"start_time" binding:"required"`
+	EndTime   string `json:"end_time" binding:"required"`
+}
+
+func (*Booking) Booking(c *gin.Context) {
+	var body BookingBody
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	startTime, err := time.Parse("2006-01-02 15:04:05", body.StartTime)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	endTime, err := time.Parse("2006-01-02 15:04:05", body.EndTime)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := GetDB(c).Transaction(func(tx *gorm.DB) error {
+		// step1. 检测该用户是否有时间冲突
+		// step2. 查询课程信息 *私教则需要检测教练是否有时间冲突 *团课则需要
+		// step2. 插入booking表该记录
+	})
+}
