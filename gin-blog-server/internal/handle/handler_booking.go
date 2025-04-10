@@ -84,6 +84,7 @@ func (*Booking) CancleBooking(c *gin.Context) {
 type GetAvailableBookingTimeQuery struct {
 	Day      string `form:"date" binding:"required"`
 	CourseID int    `form:"course_id" binding:"required"`
+	UserID   int    `form:"user_id" binding:"required,min=1"`
 }
 
 func (*Booking) GetAvailableBookingTime(c *gin.Context) {
@@ -109,10 +110,53 @@ func (*Booking) GetAvailableBookingTime(c *gin.Context) {
 
 	// 计算可用时间
 	availableTime := []string{}
-	for i := 10; i < 22; i++ {
-		hourTime := time.Date(dayTime.Year(), dayTime.Month(), dayTime.Day(), i, 0, 0, 0, time.Local)
-		availableTime = append(availableTime, hourTime.Format("2006-01-02 15:04:05"))
+
+	// 根据课程类型返回不同的可用时间
+	if course.IsSingle == 1 { // 私教课
+		// 对于私教课，返回10-22点中教练和用户都没有预约的时间段
+		for i := 10; i < 22; i++ {
+			startTime := time.Date(dayTime.Year(), dayTime.Month(), dayTime.Day(), i, 0, 0, 0, time.Local)
+			endTime := time.Date(dayTime.Year(), dayTime.Month(), dayTime.Day(), i+1, 0, 0, 0, time.Local)
+
+			// 检查用户在该时间段是否有冲突
+			userConflict, err := model.CheckUserTimeConflict(GetDB(c), query.UserID, startTime, endTime)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+
+			// 检查教练在该时间段是否有冲突
+			coachConflict, err := model.CheckCoachTimeConflict(GetDB(c), course.CoachID, startTime, endTime)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+
+			// 如果用户和教练都没有冲突，则添加到可用时间
+			if !userConflict && !coachConflict {
+				availableTime = append(availableTime, startTime.Format("2006-01-02 15:04:05"))
+			}
+		}
+	} else { // 团体课
+		// 对于团体课，只返回start_time，并且如果该时间段用户有其它预约，则不返回
+		for i := 10; i < 22; i++ {
+			startTime := time.Date(dayTime.Year(), dayTime.Month(), dayTime.Day(), i, 0, 0, 0, time.Local)
+			endTime := time.Date(dayTime.Year(), dayTime.Month(), dayTime.Day(), i+1, 0, 0, 0, time.Local)
+
+			// 检查用户在该时间段是否有冲突
+			userConflict, err := model.CheckUserTimeConflict(GetDB(c), query.UserID, startTime, endTime)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+
+			// 如果用户没有冲突，则添加到可用时间
+			if !userConflict {
+				availableTime = append(availableTime, startTime.Format("2006-01-02 15:04:05"))
+			}
+		}
 	}
+
 	ReturnSuccess(c, availableTime)
 }
 
@@ -200,13 +244,13 @@ func (*Booking) Booking(c *gin.Context) {
 			UserID:      body.UserID,
 			CourseID:    body.CourseID,
 			CoachID:     course.CoachID,
-			StartTime:   startTime,
-			EndTime:     endTime,
+			StartTime:   startTime.Format("2006-01-02 15:04:05"),
+			EndTime:     endTime.Format("2006-01-02 15:04:05"),
 			Status:      0, // 0表示已预约
 			CourseTitle: course.Title,
-			CreatedAt:   time.Now(),
+			CreatedAt:   time.Now().Format("2006-01-02 15:04:05"),
 		}
-
+		zap.L().Debug("booking ", zap.Any("startTime", startTime.String()))
 		if err := model.CreateBooking(tx, booking); err != nil {
 			return err
 		}

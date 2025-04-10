@@ -74,6 +74,7 @@ async function fetchAvailableTimeSlots() {
     const response = await api.getAvailableTimeSlots({
       date: formatDate(selectedDate.value, 'YYYY-MM-DD'),
       course_id: props.course.id,
+      user_id: userStore.userId,
     })
 
     if (response.code !== 0) {

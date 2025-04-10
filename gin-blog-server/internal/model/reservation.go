@@ -76,11 +76,11 @@ type Booking struct {
 	UserID      int `gorm:"not null"`
 	CourseID    int `gorm:"not null"`
 	CoachID     int `gorm:"not null"`
-	StartTime   time.Time
-	EndTime     time.Time
+	StartTime   string
+	EndTime     string
 	Status      int    `gorm:"not null;default:0"`
 	CourseTitle string `gorm:"not null"`
-	CreatedAt   time.Time
+	CreatedAt   string
 }
 
 func GetBookingByUserId(db *gorm.DB, userID int) ([]Booking, error) {
@@ -183,10 +183,9 @@ func CheckCourseCapacity(db *gorm.DB, courseID int, startTime, endTime time.Time
 // CreateBooking 创建预约记录
 func CreateBooking(db *gorm.DB, booking *Booking) error {
 	// 创建预约记录
-	if err := db.Create(booking).Error; err != nil {
+	if err := db.Debug().Create(booking).Error; err != nil {
 		return err
 	}
-
 	// 更新用户课程使用次数
 	if err := db.Model(&Reservation{}).Where(
 		"user_id = ? AND course_id = ?",
