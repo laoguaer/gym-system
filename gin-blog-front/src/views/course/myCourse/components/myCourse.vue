@@ -38,7 +38,7 @@ const coursesByCoach = computed(() => {
 
 // 格式化时间
 function formatCourseTime(startTime, endTime) {
-  return `${formatDate(new Date(startTime), 'YYYY-MM-DD HH:mm')} - ${formatDate(new Date(endTime), 'HH:mm')}`
+  return `${formatDate(new Date(startTime), 'HH:mm')} - ${formatDate(new Date(endTime), 'HH:mm')}`
 }
 
 // 获取课程类型
@@ -79,7 +79,7 @@ onMounted(async () => {
     const courseResult = await userStore.getMyCourseList({ user_id: userStore.userId })
     courseList.value = courseResult || []
 
-    // 获取预约记录
+    // 获取用户所有预约记录
     // const bookingResult = await userStore.getUserBookingWithDay({ user_id: userStore.userId })
     // bookingList.value = bookingResult || []
   }

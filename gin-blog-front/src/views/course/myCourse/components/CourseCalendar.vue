@@ -210,6 +210,8 @@ watch(selectedDate, () => {
 
 // 初始化
 initCurrentWeek()
+// 初始化完成后加载当天数据
+fetchDayBookings(selectedDate.value)
 </script>
 
 <template>
