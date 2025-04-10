@@ -26,6 +26,7 @@ type UserCourseVo struct {
 	TagList     []string     `json:"tag_list,omitempty"`
 	UseCnt      int          `json:"use_cnt"`
 	BuyCnt      int          `json:"buy_cnt"`
+	MaxCapacity int          `json:"max_capacity"`
 }
 
 type GetUserCourseListQuery struct {
@@ -64,6 +65,7 @@ func (*Course) GetUserCourseList(c *gin.Context) {
 			Coach:       course.Coach,
 			UseCnt:      reservation.UseCnt,
 			BuyCnt:      reservation.BuyCnt,
+			MaxCapacity: course.MaxCapacity,
 		})
 	}
 	ReturnSuccess(c, courseList)
