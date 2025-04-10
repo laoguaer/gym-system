@@ -145,11 +145,11 @@ onMounted(async () => {
             </h3>
           </div>
 
-          <div class="course-list flex flex-nowrap gap-4 overflow-x-auto pb-2">
+          <div class="course-list flex flex-nowrap snap-x gap-4 overflow-x-auto pb-4">
             <div
               v-for="course in group.courses"
               :key="course.id"
-              class="course-card w-72 flex-shrink-0 overflow-hidden rounded-lg bg-white shadow-md transition-shadow duration-300 hover:shadow-lg"
+              class="course-card w-72 flex-shrink-0 snap-start overflow-hidden rounded-lg bg-white shadow-md transition-all duration-300 hover:translate-y-[-2px] hover:shadow-lg"
             >
               <div class="p-5">
                 <div class="mb-3 flex items-start justify-between">
@@ -220,6 +220,15 @@ onMounted(async () => {
 .course-list {
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  padding: 4px 0;
+  margin: 0 -4px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: 100%;
+  overflow-x: auto;
 }
 
 .course-list::-webkit-scrollbar {
@@ -233,5 +242,12 @@ onMounted(async () => {
 .course-list::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 3px;
+}
+
+.course-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  min-width: 18rem;
+  flex: 0 0 auto;
+  margin-right: 1rem;
 }
 </style>

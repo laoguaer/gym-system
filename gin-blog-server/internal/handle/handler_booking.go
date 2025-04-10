@@ -103,6 +103,7 @@ func (*Booking) GetAvailableBookingTime(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	zap.L().Debug("course ", zap.Any("course", course))
 	if course == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "course not found"})
 		return
@@ -138,22 +139,22 @@ func (*Booking) GetAvailableBookingTime(c *gin.Context) {
 			}
 		}
 	} else { // 团体课
+		hour := course.StartTime.Hour()
+
 		// 对于团体课，只返回start_time，并且如果该时间段用户有其它预约，则不返回
-		for i := 10; i < 22; i++ {
-			startTime := time.Date(dayTime.Year(), dayTime.Month(), dayTime.Day(), i, 0, 0, 0, time.Local)
-			endTime := time.Date(dayTime.Year(), dayTime.Month(), dayTime.Day(), i+1, 0, 0, 0, time.Local)
+		startTime := time.Date(dayTime.Year(), dayTime.Month(), dayTime.Day(), hour, 0, 0, 0, time.Local)
+		endTime := time.Date(dayTime.Year(), dayTime.Month(), dayTime.Day(), hour+1, 0, 0, 0, time.Local)
 
-			// 检查用户在该时间段是否有冲突
-			userConflict, err := model.CheckUserTimeConflict(GetDB(c), query.UserID, startTime, endTime)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
+		// 检查用户在该时间段是否有冲突
+		userConflict, err := model.CheckUserTimeConflict(GetDB(c), query.UserID, startTime, endTime)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 
-			// 如果用户没有冲突，则添加到可用时间
-			if !userConflict {
-				availableTime = append(availableTime, startTime.Format("2006-01-02 15:04:05"))
-			}
+		// 如果用户没有冲突，则添加到可用时间
+		if !userConflict {
+			availableTime = append(availableTime, startTime.Format("2006-01-02 15:04:05"))
 		}
 	}
 
