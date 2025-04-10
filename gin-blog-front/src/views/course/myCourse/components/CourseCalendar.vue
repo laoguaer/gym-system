@@ -11,7 +11,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:bookingList', 'refresh'])
+const emit = defineEmits(['update:bookingList', 'refresh', 'update:selectedDate'])
 
 const userStore = useUserStore()
 
@@ -109,6 +109,9 @@ function goToCurrentWeek() {
 async function selectDate(day) {
   selectedDate.value = new Date(day.date)
   generateWeekDays() // 更新选中状态
+
+  // 发出选中日期更新事件
+  emit('update:selectedDate', selectedDate.value)
 
   // 获取选中日期的预约记录
   await fetchDayBookings(day.date)

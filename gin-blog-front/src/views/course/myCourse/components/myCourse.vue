@@ -11,6 +11,9 @@ const courseList = ref([])
 const bookingList = ref([])
 const loading = ref(true)
 
+// 当前选中的日期
+const selectedDate = ref(new Date())
+
 // 控制预约模态框
 const showBookingModal = ref(false)
 const selectedCourse = ref(null)
@@ -64,12 +67,15 @@ async function refreshData() {
     const courseResult = await userStore.getMyCourseList({ user_id: userStore.userId })
     courseList.value = courseResult || []
 
-    // 获取预约记录
-    // const bookingResult = await userStore.getMyBookings({ user_id: userStore.userId })
+    // 获取预约记录 - 使用当前选中的日期
+    const bookingResult = await userStore.getUserBookingWithDay({
+      UserID: userStore.userId,
+      Day: formatDate(selectedDate.value, 'YYYY-MM-DD'),
+    })
     bookingList.value = bookingResult || []
   }
   catch (error) {
-    console.error('获取数据失败:', error)
+    console.error('refreshData 获取数据失败:', error)
   }
 }
 
@@ -80,11 +86,11 @@ onMounted(async () => {
     courseList.value = courseResult || []
 
     // 获取用户所有预约记录
-    // const bookingResult = await userStore.getUserBookingWithDay({ user_id: userStore.userId })
-    // bookingList.value = bookingResult || []
+    const bookingResult = await userStore.getUserBookingWithDay({ UserId: userStore.userId, Day: formatDate(selectedDate.value, 'YYYY-MM-DD') })
+    bookingList.value = bookingResult || []
   }
   catch (error) {
-    console.error('获取数据失败:', error)
+    console.error('onMounted 获取数据失败:', error)
   }
   finally {
     loading.value = false
@@ -116,7 +122,11 @@ onMounted(async () => {
 
     <div v-else>
       <!-- 课程表组件 -->
-      <CourseCalendar v-model:booking-list="bookingList" @refresh="refreshData" />
+      <CourseCalendar
+        v-model:booking-list="bookingList"
+        @refresh="refreshData"
+        @update:selected-date="date => selectedDate = date"
+      />
 
       <!-- 课程列表 -->
       <div class="my-courses-list space-y-8">
