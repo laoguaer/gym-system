@@ -124,3 +124,76 @@ func CancleBookingAndSubUseCnt(db *gorm.DB, id int) error {
 	}
 	return nil
 }
+
+// CheckUserTimeConflict 检测用户在指定时间段是否有时间冲突
+func CheckUserTimeConflict(db *gorm.DB, userID int, startTime, endTime time.Time) (bool, error) {
+	var count int64
+	// 使用SQL查询逻辑检测时间冲突
+	// 如果存在满足条件的记录，则表示有冲突
+	err := db.Model(&Booking{}).Where(
+		"user_id = ? AND start_time < ? AND end_time > ? AND status = 0",
+		userID, endTime, startTime,
+	).Count(&count).Error
+
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
+// CheckCoachTimeConflict 检测教练在指定时间段是否有时间冲突（针对私教课）
+func CheckCoachTimeConflict(db *gorm.DB, coachID int, startTime, endTime time.Time) (bool, error) {
+	var count int64
+	// 使用SQL查询逻辑检测时间冲突
+	// 如果存在满足条件的记录，则表示有冲突
+	err := db.Model(&Booking{}).Where(
+		"coach_id = ? AND start_time < ? AND end_time > ? AND status = 0",
+		coachID, endTime, startTime,
+	).Count(&count).Error
+
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
+// CheckCourseCapacity 检查团课是否已达到最大人数
+func CheckCourseCapacity(db *gorm.DB, courseID int, startTime, endTime time.Time) (bool, int, error) {
+	// 1. 获取课程信息，查询最大容量
+	var course Course
+	if err := db.Model(&Course{}).Where("id = ?", courseID).First(&course).Error; err != nil {
+		return false, 0, err
+	}
+
+	// 2. 查询当前已预约人数
+	var count int64
+	if err := db.Model(&Booking{}).Where(
+		"course_id = ? AND start_time = ? AND end_time = ? AND status = 0",
+		courseID, startTime, endTime,
+	).Count(&count).Error; err != nil {
+		return false, 0, err
+	}
+
+	// 3. 判断是否已达到最大容量
+	return int(count) >= course.MaxCapacity, course.MaxCapacity - int(count), nil
+}
+
+// CreateBooking 创建预约记录
+func CreateBooking(db *gorm.DB, booking *Booking) error {
+	// 创建预约记录
+	if err := db.Create(booking).Error; err != nil {
+		return err
+	}
+
+	// 更新用户课程使用次数
+	if err := db.Model(&Reservation{}).Where(
+		"user_id = ? AND course_id = ?",
+		booking.UserID, booking.CourseID,
+	).Update("use_cnt", gorm.Expr("use_cnt + ?", 1)).Error; err != nil {
+		return err
+	}
+
+	return nil
+}

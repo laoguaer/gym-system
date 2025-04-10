@@ -250,8 +250,9 @@ func registerBlogHandler(r *gin.Engine) {
 	booking := base.Group("/booking")
 	{
 		booking.GET("/myBookingsWithDay", bookingApi.GetUserBookingWithDay) // 前台预约列表
-		booking.POST("/cancelBooking", bookingApi.CancleBooking)     // 前台取消预约
+		booking.POST("/cancelBooking", bookingApi.CancleBooking)            // 前台取消预约
 		booking.GET("/availableTime", bookingApi.GetAvailableBookingTime)
+		booking.POST("/book", bookingApi.Booking) // 前台预约课程
 	}
 
 	// 需要登录才能进行的操作

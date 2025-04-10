@@ -173,6 +173,7 @@ onMounted(async () => {
                 </div>
 
                 <!-- 预约按钮 -->
+                <!-- todo 预约后没有刷新calendar当天的数据 -->
                 <div class="mt-3 border-t border-gray-100 pt-3">
                   <button
                     class="w-full rounded-md bg-blue-600 px-3 py-2 text-sm text-white font-medium transition-colors hover:bg-blue-700"

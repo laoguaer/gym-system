@@ -142,7 +142,79 @@ func (*Booking) Booking(c *gin.Context) {
 
 	if err := GetDB(c).Transaction(func(tx *gorm.DB) error {
 		// step1. 检测该用户是否有时间冲突
-		// step2. 查询课程信息 *私教则需要检测教练是否有时间冲突 *团课则需要
-		// step2. 插入booking表该记录
-	})
+		hasConflict, err := model.CheckUserTimeConflict(tx, body.UserID, startTime, endTime)
+		if err != nil {
+			return err
+		}
+		if hasConflict {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "用户在该时间段已有预约"})
+			return err
+		}
+
+		// step2. 查询课程信息
+		course, err := model.GetCourseById(tx, body.CourseID)
+		if err != nil {
+			return err
+		}
+		if course == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "课程不存在"})
+			return err
+		}
+
+		// 检查用户是否购买了该课程且有足够的次数
+		reservation, err := model.GetReservationByUserIdAndCourseId(tx, body.UserID, body.CourseID)
+		if err != nil {
+			return err
+		}
+		if reservation == nil || reservation.BuyCnt <= reservation.UseCnt {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "未购买该课程或可用次数不足"})
+			return err
+		}
+
+		// 根据课程类型进行不同的检查
+		if course.IsSingle == 1 { // 私教课
+			// 检测教练是否有时间冲突
+			hasCoachConflict, err := model.CheckCoachTimeConflict(tx, course.CoachID, startTime, endTime)
+			if err != nil {
+				return err
+			}
+			if hasCoachConflict {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "教练在该时间段已有预约"})
+				return err
+			}
+		} else { // 团课
+			// 检查是否已达到最大人数
+			isFull, remainingSlots, err := model.CheckCourseCapacity(tx, body.CourseID, startTime, endTime)
+			if err != nil {
+				return err
+			}
+			if isFull {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "该课程已达到最大人数"})
+				return err
+			}
+			zap.L().Debug("课程剩余名额", zap.Int("remainingSlots", remainingSlots))
+		}
+
+		// step3. 插入booking表该记录
+		booking := &model.Booking{
+			UserID:      body.UserID,
+			CourseID:    body.CourseID,
+			CoachID:     course.CoachID,
+			StartTime:   startTime,
+			EndTime:     endTime,
+			Status:      0, // 0表示已预约
+			CourseTitle: course.Title,
+			CreatedAt:   time.Now(),
+		}
+
+		if err := model.CreateBooking(tx, booking); err != nil {
+			return err
+		}
+
+		return nil
+	}); err != nil {
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
+	ReturnSuccess(c, nil)
 }
