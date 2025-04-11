@@ -82,7 +82,7 @@ function buildRoutes(routes = []) {
   for (const e of routes) {
     if (e.is_catalogue) {
       result.push({
-        name: e.name,
+        name: `${e.name}_layout`, // 修改父路由名称，避免与子路由重名
         path: '/', // *
         component: shallowRef(Layout),
         isHidden: e.is_hidden,
