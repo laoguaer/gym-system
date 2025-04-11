@@ -218,6 +218,21 @@ onMounted(async () => {
 }
 
 .course-list {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px; /* 适当的间距 */
+  overflow-x: auto; /* 确保水平滚动条生效 */
+  padding: 4px 0;
+  margin: 0 -4px;
+}
+
+.course-card {
+  min-width: 18rem; /* 卡片的最小宽度 */
+  flex-shrink: 0; /* 确保卡片不被压缩 */
+  margin-right: 1rem; /* 间距 */
+}
+
+.course-list {
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
   padding: 4px 0;

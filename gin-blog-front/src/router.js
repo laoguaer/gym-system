@@ -58,14 +58,6 @@ const basicRoutes = [
     },
   },
   {
-    name: 'Link',
-    path: '/links',
-    component: () => import('@/views/link/index.vue'),
-    meta: {
-      title: '友情链接',
-    },
-  },
-  {
     name: 'About',
     path: '/about',
     component: () => import('@/views/about/index.vue'),

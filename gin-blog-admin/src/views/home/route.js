@@ -11,7 +11,7 @@ export default {
   isCatalogue: true,
   children: [
     {
-      name: 'Home',
+      name: 'HomePage',
       path: 'home',
       component: () => import('./index.vue'),
       meta: {
