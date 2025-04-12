@@ -97,4 +97,25 @@ export default {
   createCourse: data => request.post('/course', data),
   updateCourse: data => request.put('/course', data),
   deleteCourse: (data = []) => request.delete('/course', { data }),
+
+  // 预约相关接口
+  getReservations: (params = {}) => request.get('/reservation/list', { params }),
+  updateReservation: data => request.put('/reservation', data),
+  updateReservationStatus: (id, status) => request.put('/reservation/status', { id, status }),
+  deleteReservation: (data = []) => request.delete('/reservation', { data }),
+
+  // 学员相关接口
+  getStudents: (params = {}) => request.get('/student/list', { params }),
+  updateStudent: data => request.put('/student', data),
+  getStudentCourses: id => request.get(`/student/courses/${id}`),
+
+  // 教练相关接口
+  getCoaches: (params = {}) => request.get('/coach/list', { params }),
+  createCoach: data => request.post('/coach', data),
+  updateCoach: data => request.put('/coach', data),
+  deleteCoach: (data = []) => request.delete('/coach', { data }),
+  updateCoachDisable: (id, is_disable) => request.put('/coach/disable', {
+    id,
+    is_disable,
+  }),
 }
