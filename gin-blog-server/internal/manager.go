@@ -33,6 +33,7 @@ var (
 	coachAPI        handle.Coach        // 教练
 	courseAPI       handle.Course       // 课程
 	bookingApi      handle.Booking      // 预约
+	studentAPI      handle.Student      // 学员
 	// 博客前台接口
 
 	frontAPI handle.Front // 博客前台接口汇总
@@ -144,6 +145,7 @@ func registerAdminHandler(r *gin.Engine) {
 		link.POST("", linkAPI.SaveOrUpdate) // 新增/编辑友链
 		link.DELETE("", linkAPI.Delete)     // 删除友链
 	}
+	我在manager.go中新增或修改了四个api，你需要新增或者修改相应handler的函数，代码风格需要和
 	// 资源模块
 	resource := auth.Group("/resource")
 	{
@@ -187,6 +189,21 @@ func registerAdminHandler(r *gin.Engine) {
 	coach := auth.Group("/coach")
 	{
 		coach.GET("/list", coachAPI.GetList) // 教练列表
+	}
+	// 学员模块
+	student := auth.Group("/student")
+	{
+		student.GET("/list", studentAPI.GetList) // 学员列表
+	}
+	// 课程模块
+	course := auth.Group("/course")
+	{
+		course.GET("/list", courseAPI.GetList) // 课程列表
+	}
+	// 预约模块
+	booking := auth.Group("/booking")
+	{
+		booking.GET("/list", bookingApi.GetList) // 预约列表
 	}
 }
 
