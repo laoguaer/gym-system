@@ -91,4 +91,10 @@ export default {
   getPages: () => request.get('/page/list'),
   saveOrUpdatePage: data => request.post('/page', data),
   deletePage: (data = []) => request.delete('/page', { data }),
+
+  // 课程相关接口
+  getCourseList: (params = {}) => request.get('/course/list', { params }),
+  createCourse: data => request.post('/course', data),
+  updateCourse: data => request.put('/course', data),
+  deleteCourse: (data = []) => request.delete('/course', { data }),
 }

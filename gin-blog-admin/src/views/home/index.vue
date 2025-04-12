@@ -68,9 +68,13 @@ async function getOneSentence() {
         <template
           v-for="item of [
             { icon: 'i-fa6-solid:users', color: 'text-[#40C9C6]', label: '访问量', key: 'view_count' },
-            { icon: 'i-heroicons:users-solid', color: 'text-[#34BFA3]', label: '用户量', key: 'user_count' },
-            { icon: 'i-material-symbols:article', color: 'text-[#F4516C]', label: '文章量', key: 'article_count' },
+            { icon: 'i-material-symbols:article', color: 'text-[#F4516C]', label: '教学文章数量', key: 'article_count' },
             { icon: 'i-bxs:comment-dots', color: 'text-[#36A3F7]', label: '留言量', key: 'message_count' },
+            { icon: '', color: '', label: '课程数量', key: '' },
+            { icon: '', color: '', label: '预约数量', key: '' },
+            { icon: '', color: '', label: '教练数量', key: '' },
+            { icon: '', color: '', label: '会员数量', key: '' },
+            { icon: '', color: '', label: '教学视频数量', key: '' },
           ]" :key="item.key"
         >
           <NGi>
@@ -88,7 +92,7 @@ async function getOneSentence() {
       </NGrid>
 
       <!-- TODO: 完善首页设计 -->
-      <NCard title="项目" size="small" class="mt-4">
+      <!-- <NCard title="项目" size="small" class="mt-4">
         <template #header-extra>
           <NButton text type="primary">
             更多
@@ -104,7 +108,7 @@ async function getOneSentence() {
             这是个基于 gin 开发的博客管理后台
           </p>
         </NCard>
-      </NCard>
+      </NCard> -->
     </div>
   </AppPage>
 </template>
