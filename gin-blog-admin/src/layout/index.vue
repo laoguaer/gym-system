@@ -57,7 +57,7 @@ const keepAliveRouteNames = computed(() => {
               v-if="tagStore.reloading"
               :key="tagStore.aliveKeys[route.name] || route.fullPath"
             />
-          </keepalive>
+          </KeepAlive>
         </RouterView>
       </section>
     </article>
