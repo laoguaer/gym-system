@@ -145,7 +145,6 @@ func registerAdminHandler(r *gin.Engine) {
 		link.POST("", linkAPI.SaveOrUpdate) // 新增/编辑友链
 		link.DELETE("", linkAPI.Delete)     // 删除友链
 	}
-	我在manager.go中新增或修改了四个api，你需要新增或者修改相应handler的函数，代码风格需要和
 	// 资源模块
 	resource := auth.Group("/resource")
 	{

@@ -11,13 +11,12 @@ import { convertImgUrl, formatDate } from '@/utils'
 import { useCRUD } from '@/composables'
 import api from '@/api'
 
-defineOptions({ name: '我的学员' })
+defineOptions({ name: '学员管理' })
 
 const $table = ref(null)
 const queryItems = ref({
   name: '',
-  phone: '',
-  status: null,
+  nickname: '',
 })
 
 const {
@@ -31,19 +30,6 @@ const {
   doUpdate: api.updateStudent,
   refresh: () => $table.value?.handleSearch(),
 })
-
-// 学员状态选项
-const statusOptions = [
-  { label: '正常', value: 1 },
-  { label: '已过期', value: 2 },
-  { label: '已暂停', value: 3 },
-]
-
-const statusMap = {
-  1: { name: '正常', tag: 'success' },
-  2: { name: '已过期', tag: 'error' },
-  3: { name: '已暂停', tag: 'warning' },
-}
 
 onMounted(() => {
   $table.value?.handleSearch()
@@ -66,49 +52,32 @@ const columns = [
     },
   },
   {
-    title: '姓名',
-    key: 'name',
+    title: '用户名',
+    key: 'username',
     width: 80,
     align: 'center',
     ellipsis: { tooltip: true },
   },
   {
-    title: '性别',
-    key: 'gender',
-    width: 40,
+    title: '昵称',
+    key: 'nickname',
+    width: 80,
     align: 'center',
-    render(row) {
-      return h('span', row.gender === 1 ? '男' : '女')
-    },
+    ellipsis: { tooltip: true },
   },
   {
-    title: '电话',
-    key: 'phone',
+    title: '邮箱',
+    key: 'email',
     width: 100,
     align: 'center',
     ellipsis: { tooltip: true },
   },
   {
-    title: '会员状态',
-    key: 'status',
-    width: 80,
-    align: 'center',
-    render(row) {
-      return h(
-        NTag,
-        { type: statusMap[row.status]?.tag },
-        { default: () => statusMap[row.status]?.name || '未知' },
-      )
-    },
-  },
-  {
-    title: '会员到期时间',
-    key: 'expire_time',
-    align: 'center',
+    title: '简介',
+    key: 'intro',
     width: 120,
-    render(row) {
-      return h('span', formatDate(row.expire_time, 'YYYY-MM-DD'))
-    },
+    align: 'center',
+    ellipsis: { tooltip: true },
   },
   {
     title: '注册时间',
@@ -127,11 +96,20 @@ const columns = [
     },
   },
   {
-    title: '备注',
-    key: 'remark',
-    width: 120,
+    title: '更新时间',
+    key: 'updated_at',
     align: 'center',
-    ellipsis: { tooltip: true },
+    width: 120,
+    render(row) {
+      return h(
+        NButton,
+        { size: 'small', type: 'text', ghost: true },
+        {
+          default: () => formatDate(row.updated_at),
+          icon: () => h('i', { class: 'i-mdi:update' }),
+        },
+      )
+    },
   },
   {
     title: '操作',
@@ -177,7 +155,7 @@ async function handleViewCourses(id) {
     return
   }
   try {
-    const resp = await api.getStudentCourses(id)
+    // const resp = await api.getStudentCourses(id)
     // 这里可以实现查看学员课程记录的逻辑
     $message?.info('查看课程记录功能开发中')
   }
@@ -188,7 +166,7 @@ async function handleViewCourses(id) {
 </script>
 
 <template>
-  <CommonPage title="我的学员">
+  <CommonPage title="学员管理">
     <CrudTable
       ref="$table"
       v-model:query-items="queryItems"
@@ -197,19 +175,11 @@ async function handleViewCourses(id) {
       :scroll-x="1200"
     >
       <template #queryBar>
-        <QueryItem label="学员姓名" :label-width="80">
-          <NInput v-model:value="queryItems.name" clearable placeholder="请输入学员姓名" />
+        <QueryItem label="姓名" :label-width="80">
+          <NInput v-model:value="queryItems.name" clearable placeholder="请输入姓名" />
         </QueryItem>
-        <QueryItem label="电话" :label-width="80">
-          <NInput v-model:value="queryItems.phone" clearable placeholder="请输入电话号码" />
-        </QueryItem>
-        <QueryItem label="会员状态" :label-width="80">
-          <NSelect
-            v-model:value="queryItems.status"
-            clearable
-            placeholder="请选择会员状态"
-            :options="statusOptions"
-          />
+        <QueryItem label="昵称" :label-width="80">
+          <NInput v-model:value="queryItems.nickname" clearable placeholder="请输入昵称" />
         </QueryItem>
       </template>
     </CrudTable>
@@ -218,7 +188,7 @@ async function handleViewCourses(id) {
       v-model:visible="modalVisible"
       :loading="modalLoading"
       title="学员详情"
-      @submit="modalFormRef?.submit()"
+      @save="handleEdit"
     >
       <NForm
         ref="modalFormRef"
@@ -230,33 +200,23 @@ async function handleViewCourses(id) {
           maxWidth: '640px',
         }"
       >
-        <NFormItem label="学员姓名" path="name">
-          <NInput v-model:value="modalForm.name" disabled />
+        <NFormItem label="用户名" path="username">
+          <NInput v-model:value="modalForm.username" disabled />
         </NFormItem>
-        <NFormItem label="性别" path="gender">
-          <NSelect
-            v-model:value="modalForm.gender"
-            :options="[{ label: '男', value: 1 }, { label: '女', value: 2 }]"
-            disabled
-          />
+        <NFormItem label="邮箱" path="email">
+          <NInput v-model:value="modalForm.email" disabled />
         </NFormItem>
-        <NFormItem label="电话" path="phone">
-          <NInput v-model:value="modalForm.phone" disabled />
+        <NFormItem label="昵称" path="nickname">
+          <NInput v-model:value="modalForm.nickname" disabled />
         </NFormItem>
-        <NFormItem label="会员状态" path="status">
-          <NSelect
-            v-model:value="modalForm.status"
-            :options="statusOptions"
-          />
+        <NFormItem label="头像" path="avatar">
+          <NInput v-model:value="modalForm.avatar" disabled />
         </NFormItem>
-        <NFormItem label="会员到期时间" path="expire_time">
-          <NInput v-model:value="modalForm.expire_time" disabled />
-        </NFormItem>
-        <NFormItem label="备注" path="remark">
+        <NFormItem label="简介" path="intro">
           <NInput
-            v-model:value="modalForm.remark"
+            v-model:value="modalForm.intro"
             type="textarea"
-            placeholder="请输入备注信息"
+            placeholder="请输入简介信息"
           />
         </NFormItem>
       </NForm>

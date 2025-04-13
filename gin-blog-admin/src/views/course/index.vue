@@ -15,9 +15,10 @@ defineOptions({ name: '课程列表' })
 
 const $table = ref(null)
 const queryItems = ref({
-  name: '',
-  type: null,
-  status: null,
+  title: '',
+  coach_id: null,
+  tag_id: null,
+  is_single: null,
 })
 
 const {
@@ -34,99 +35,133 @@ const {
   refresh: () => $table.value?.handleSearch(),
 })
 
-// 课程类型选项
-const typeOptions = [
-  { label: '团体课', value: 1 },
-  { label: '私教课', value: 2 },
-  { label: '特色课', value: 3 },
+// 课程类型选项（单人/团体）
+const singleOptions = [
+  { label: '单人课程', value: 1 },
+  { label: '团体课程', value: 0 },
 ]
 
-const typeMap = {
-  1: { name: '团体课', tag: 'info' },
-  2: { name: '私教课', tag: 'success' },
-  3: { name: '特色课', tag: 'warning' },
+const singleMap = {
+  1: { name: '单人课程', tag: 'info' },
+  0: { name: '团体课程', tag: 'success' },
 }
 
-// 课程状态选项
-const statusOptions = [
-  { label: '正常', value: 1 },
-  { label: '已满', value: 2 },
-  { label: '停课', value: 3 },
-]
+// 教练选项
+const coachOptions = ref([])
+// 标签选项
+const tagOptions = ref([])
 
-const statusMap = {
-  1: { name: '正常', tag: 'success' },
-  2: { name: '已满', tag: 'warning' },
-  3: { name: '停课', tag: 'error' },
-}
-
-onMounted(() => {
+onMounted(async () => {
   $table.value?.handleSearch()
+  try {
+    // 获取教练选项 - 使用page和page_size参数，与CrudTable组件保持一致
+    const coachResp = await api.getCoaches({ page: 1, page_size: 10 })
+    if (coachResp && coachResp.data) {
+      coachOptions.value = coachResp.data.list.map(coach => ({
+        label: coach.name,
+        value: coach.id,
+      }))
+    }
+
+    // 获取标签选项
+    const tagResp = await api.getTagOption()
+    if (tagResp && tagResp.data) {
+      tagOptions.value = tagResp.data
+    }
+  }
+  catch (err) {
+    console.error(err)
+  }
 })
 
 const columns = [
   {
     title: '课程名称',
-    key: 'name',
-    width: 100,
+    key: 'title',
+    width: 120,
+    align: 'center',
+    ellipsis: { tooltip: true },
+  },
+  {
+    title: '课程描述',
+    key: 'description',
+    width: 150,
     align: 'center',
     ellipsis: { tooltip: true },
   },
   {
     title: '课程类型',
-    key: 'type',
+    key: 'is_single',
     width: 80,
     align: 'center',
     render(row) {
       return h(
         NTag,
-        { type: typeMap[row.type]?.tag },
-        { default: () => typeMap[row.type]?.name || '未知' },
+        { type: singleMap[row.is_single]?.tag },
+        { default: () => singleMap[row.is_single]?.name || '未知' },
       )
     },
   },
   {
-    title: '课程状态',
-    key: 'status',
-    width: 80,
+    title: '标签',
+    key: 'tags',
+    width: 100,
     align: 'center',
+    ellipsis: { tooltip: true },
     render(row) {
+      if (!row.tag_list || row.tag_list.length === 0)
+        return h('span', '无')
       return h(
-        NTag,
-        { type: statusMap[row.status]?.tag },
-        { default: () => statusMap[row.status]?.name || '未知' },
+        NSpace,
+        { size: 'small', wrap: true },
+        {
+          default: () => row.tag_list.map(tag => h(
+            NTag,
+            { size: 'small', type: 'info' },
+            { default: () => tag },
+          )),
+        },
       )
     },
   },
   {
-    title: '课程价格',
-    key: 'price',
+    title: '教练',
+    key: 'coach_id',
     width: 80,
     align: 'center',
     render(row) {
-      return h('span', `¥${row.price}`)
+      return h('span', row.coach?.name || '未分配')
     },
   },
   {
-    title: '课程容量',
-    key: 'capacity',
+    title: '最大容量',
+    key: 'max_capacity',
     width: 80,
     align: 'center',
   },
   {
-    title: '课程时长',
-    key: 'duration',
-    width: 80,
+    title: '开始时间',
+    key: 'start_time',
+    width: 150,
     align: 'center',
     render(row) {
-      return h('span', `${row.duration}分钟`)
+      return h('span', formatDate(row.start_time, 'YYYY-MM-DD HH:mm'))
+    },
+  },
+  {
+    title: '结束时间',
+    key: 'end_time',
+    width: 150,
+    align: 'center',
+    render(row) {
+      return h('span', formatDate(row.end_time, 'YYYY-MM-DD HH:mm'))
     },
   },
   {
     title: '创建时间',
     key: 'created_at',
     align: 'center',
-    width: 120,
+    width: 150,
     render(row) {
       return h(
         NButton,
@@ -203,31 +238,39 @@ async function handleDelete(ids) {
     >
       <template #queryBar>
         <QueryItem label="课程名称" :label-width="80">
-          <NInput v-model:value="queryItems.name" clearable placeholder="请输入课程名称" />
+          <NInput v-model:value="queryItems.title" clearable placeholder="请输入课程名称" />
+        </QueryItem>
+        <QueryItem label="教练" :label-width="80">
+          <NSelect
+            v-model:value="queryItems.coach_id"
+            clearable
+            placeholder="请选择教练"
+            :options="coachOptions"
+          />
+        </QueryItem>
+        <QueryItem label="标签" :label-width="80">
+          <NSelect
+            v-model:value="queryItems.tag_id"
+            clearable
+            placeholder="请选择标签"
+            :options="tagOptions"
+          />
         </QueryItem>
         <QueryItem label="课程类型" :label-width="80">
           <NSelect
-            v-model:value="queryItems.type"
+            v-model:value="queryItems.is_single"
             clearable
             placeholder="请选择课程类型"
-            :options="typeOptions"
-          />
-        </QueryItem>
-        <QueryItem label="课程状态" :label-width="80">
-          <NSelect
-            v-model:value="queryItems.status"
-            clearable
-            placeholder="请选择课程状态"
-            :options="statusOptions"
+            :options="singleOptions"
           />
         </QueryItem>
       </template>
 
       <template #toolbar>
-        <NButton
-          type="primary"
-          @click="handleSave()"
-        >
+        <NButton type="primary" @click="handleEdit({})">
+          <template #icon>
+            <i class="i-material-symbols:add" />
+          </template>
           新增课程
         </NButton>
       </template>
@@ -237,7 +280,7 @@ async function handleDelete(ids) {
       v-model:visible="modalVisible"
       :loading="modalLoading"
       :title="`${modalForm.id ? '编辑' : '新增'}课程`"
-      @submit="modalFormRef?.submit()"
+      @save="handleSave"
     >
       <NForm
         ref="modalFormRef"
@@ -249,52 +292,55 @@ async function handleDelete(ids) {
           maxWidth: '640px',
         }"
       >
-        <NFormItem label="课程名称" path="name" rule="required">
-          <NInput v-model:value="modalForm.name" placeholder="请输入课程名称" />
-        </NFormItem>
-        <NFormItem label="课程类型" path="type" rule="required">
-          <NSelect
-            v-model:value="modalForm.type"
-            placeholder="请选择课程类型"
-            :options="typeOptions"
-          />
-        </NFormItem>
-        <NFormItem label="课程状态" path="status" rule="required">
-          <NSelect
-            v-model:value="modalForm.status"
-            placeholder="请选择课程状态"
-            :options="statusOptions"
-          />
-        </NFormItem>
-        <NFormItem label="课程价格" path="price" rule="required">
-          <NInputNumber
-            v-model:value="modalForm.price"
-            placeholder="请输入课程价格"
-            :min="0"
-            :precision="2"
-          />
-        </NFormItem>
-        <NFormItem label="课程容量" path="capacity" rule="required">
-          <NInputNumber
-            v-model:value="modalForm.capacity"
-            placeholder="请输入课程容量"
-            :min="1"
-            :precision="0"
-          />
-        </NFormItem>
-        <NFormItem label="课程时长(分钟)" path="duration" rule="required">
-          <NInputNumber
-            v-model:value="modalForm.duration"
-            placeholder="请输入课程时长"
-            :min="1"
-            :precision="0"
-          />
+        <NFormItem label="课程名称" path="title" rule="required">
+          <NInput v-model:value="modalForm.title" placeholder="请输入课程名称" />
         </NFormItem>
         <NFormItem label="课程描述" path="description">
           <NInput
             v-model:value="modalForm.description"
             type="textarea"
             placeholder="请输入课程描述"
+          />
+        </NFormItem>
+        <NFormItem label="课程标签" path="tags">
+          <NInput v-model:value="modalForm.tags" placeholder="请输入课程标签，多个标签用逗号分隔" />
+        </NFormItem>
+        <NFormItem label="开始时间" path="start_time" rule="required">
+          <NTimePicker
+            v-model:value="modalForm.start_time"
+            type="datetime"
+            clearable
+            placeholder="请选择开始时间"
+          />
+        </NFormItem>
+        <NFormItem label="结束时间" path="end_time" rule="required">
+          <NTimePicker
+            v-model:value="modalForm.end_time"
+            type="datetime"
+            clearable
+            placeholder="请选择结束时间"
+          />
+        </NFormItem>
+        <NFormItem label="教练" path="coach_id" rule="required">
+          <NSelect
+            v-model:value="modalForm.coach_id"
+            placeholder="请选择教练"
+            :options="coachOptions"
+          />
+        </NFormItem>
+        <NFormItem label="最大容量" path="max_capacity" rule="required">
+          <NInputNumber
+            v-model:value="modalForm.max_capacity"
+            placeholder="请输入最大容量"
+            :min="1"
+            :precision="0"
+          />
+        </NFormItem>
+        <NFormItem label="课程类型" path="is_single" rule="required">
+          <NSelect
+            v-model:value="modalForm.is_single"
+            placeholder="请选择课程类型"
+            :options="singleOptions"
           />
         </NFormItem>
       </NForm>

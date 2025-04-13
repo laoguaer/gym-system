@@ -11,6 +11,28 @@ import (
 )
 
 type Course struct{}
+
+func (*Course) GetList(c *gin.Context) {
+	var query model.CourseQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		ReturnError(c, g.ErrRequest, err)
+		return
+	}
+
+	list, total, err := model.GetCourseList(GetDB(c), query.Page, query.Size, query.Title, query.CoachID, query.TagID, query.IsSingle)
+	if err != nil {
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
+
+	ReturnSuccess(c, PageResult[model.CourseVO]{
+		Total: total,
+		List:  list,
+		Size:  query.Size,
+		Page:  query.Page,
+	})
+}
+
 type MyCourseVo struct {
 	Courses []model.CourseVO `json:"courses"`
 }

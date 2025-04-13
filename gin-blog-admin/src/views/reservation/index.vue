@@ -15,9 +15,10 @@ defineOptions({ name: '预约管理' })
 
 const $table = ref(null)
 const queryItems = ref({
-  student_name: '',
-  course_name: '',
+  user_id: null,
+  course_id: null,
   status: null,
+  date: '',
 })
 
 const {
@@ -53,23 +54,37 @@ onMounted(() => {
 
 const columns = [
   {
-    title: '学员姓名',
-    key: 'student_name',
+    title: '预约ID',
+    key: 'id',
+    width: 60,
+    align: 'center',
+    ellipsis: { tooltip: true },
+  },
+  {
+    title: '用户ID',
+    key: 'user_id',
     width: 80,
     align: 'center',
     ellipsis: { tooltip: true },
   },
   {
-    title: '课程名称',
-    key: 'course_name',
-    width: 100,
+    title: '课程ID',
+    key: 'course_id',
+    width: 80,
     align: 'center',
     ellipsis: { tooltip: true },
   },
   {
-    title: '教练姓名',
-    key: 'coach_name',
+    title: '教练ID',
+    key: 'coach_id',
     width: 80,
+    align: 'center',
+    ellipsis: { tooltip: true },
+  },
+  {
+    title: '课程标题',
+    key: 'course_title',
+    width: 120,
     align: 'center',
     ellipsis: { tooltip: true },
   },
@@ -87,12 +102,21 @@ const columns = [
     },
   },
   {
-    title: '预约时间',
-    key: 'reservation_time',
+    title: '开始时间',
+    key: 'start_time',
     align: 'center',
     width: 150,
     render(row) {
-      return h('span', formatDate(row.reservation_time, 'YYYY-MM-DD HH:mm'))
+      return h('span', row.start_time)
+    },
+  },
+  {
+    title: '结束时间',
+    key: 'end_time',
+    align: 'center',
+    width: 150,
+    render(row) {
+      return h('span', row.end_time)
     },
   },
   {
@@ -105,18 +129,11 @@ const columns = [
         NButton,
         { size: 'small', type: 'text', ghost: true },
         {
-          default: () => formatDate(row.created_at),
+          default: () => row.created_at,
           icon: () => h('i', { class: 'i-mdi:update' }),
         },
       )
     },
-  },
-  {
-    title: '备注',
-    key: 'remark',
-    width: 120,
-    align: 'center',
-    ellipsis: { tooltip: true },
   },
   {
     title: '操作',
@@ -224,11 +241,11 @@ async function handleUpdateStatus(id, status) {
       :scroll-x="1200"
     >
       <template #queryBar>
-        <QueryItem label="学员姓名" :label-width="80">
-          <NInput v-model:value="queryItems.student_name" clearable placeholder="请输入学员姓名" />
+        <QueryItem label="用户ID" :label-width="80">
+          <NInput v-model:value="queryItems.user_id" clearable placeholder="请输入用户ID" />
         </QueryItem>
-        <QueryItem label="课程名称" :label-width="80">
-          <NInput v-model:value="queryItems.course_name" clearable placeholder="请输入课程名称" />
+        <QueryItem label="课程ID" :label-width="80">
+          <NInput v-model:value="queryItems.course_id" clearable placeholder="请输入课程ID" />
         </QueryItem>
         <QueryItem label="预约状态" :label-width="80">
           <NSelect
@@ -237,6 +254,9 @@ async function handleUpdateStatus(id, status) {
             placeholder="请选择预约状态"
             :options="statusOptions"
           />
+        </QueryItem>
+        <QueryItem label="预约日期" :label-width="80">
+          <NInput v-model:value="queryItems.date" clearable placeholder="请输入预约日期" />
         </QueryItem>
       </template>
     </CrudTable>
@@ -257,14 +277,17 @@ async function handleUpdateStatus(id, status) {
           maxWidth: '640px',
         }"
       >
-        <NFormItem label="学员姓名" path="student_name">
-          <NInput v-model:value="modalForm.student_name" disabled />
+        <NFormItem label="用户ID" path="user_id">
+          <NInput v-model:value="modalForm.user_id" disabled />
         </NFormItem>
-        <NFormItem label="课程名称" path="course_name">
-          <NInput v-model:value="modalForm.course_name" disabled />
+        <NFormItem label="课程ID" path="course_id">
+          <NInput v-model:value="modalForm.course_id" disabled />
         </NFormItem>
-        <NFormItem label="教练姓名" path="coach_name">
-          <NInput v-model:value="modalForm.coach_name" disabled />
+        <NFormItem label="教练ID" path="coach_id">
+          <NInput v-model:value="modalForm.coach_id" disabled />
+        </NFormItem>
+        <NFormItem label="课程标题" path="course_title">
+          <NInput v-model:value="modalForm.course_title" disabled />
         </NFormItem>
         <NFormItem label="预约状态" path="status">
           <NSelect
@@ -272,15 +295,11 @@ async function handleUpdateStatus(id, status) {
             :options="statusOptions"
           />
         </NFormItem>
-        <NFormItem label="预约时间" path="reservation_time">
-          <NInput v-model:value="modalForm.reservation_time" disabled />
+        <NFormItem label="开始时间" path="start_time">
+          <NInput v-model:value="modalForm.start_time" disabled />
         </NFormItem>
-        <NFormItem label="备注" path="remark">
-          <NInput
-            v-model:value="modalForm.remark"
-            type="textarea"
-            placeholder="请输入备注信息"
-          />
+        <NFormItem label="结束时间" path="end_time">
+          <NInput v-model:value="modalForm.end_time" disabled />
         </NFormItem>
       </NForm>
     </CrudModal>

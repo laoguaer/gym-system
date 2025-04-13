@@ -99,10 +99,10 @@ export default {
   deleteCourse: (data = []) => request.delete('/course', { data }),
 
   // 预约相关接口
-  getReservations: (params = {}) => request.get('/reservation/list', { params }),
-  updateReservation: data => request.put('/reservation', data),
-  updateReservationStatus: (id, status) => request.put('/reservation/status', { id, status }),
-  deleteReservation: (data = []) => request.delete('/reservation', { data }),
+  getReservations: (params = {}) => request.get('/booking/list', { params }),
+  updateReservation: data => request.put('/booking', data),
+  updateReservationStatus: (id, status) => request.put('/booking/status', { id, status }),
+  deleteReservation: (data = []) => request.delete('/booking', { data }),
 
   // 学员相关接口
   getStudents: (params = {}) => request.get('/student/list', { params }),

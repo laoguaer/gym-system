@@ -26,32 +26,48 @@ type CoachVO struct {
 	Courses    int     `json:"courses"`
 }
 
-// GetList 获取教练列表
-// @Summary 获取教练列表
-// @Description 获取教练列表
-// @Tags 教练模块
-// @Accept application/json
-// @Produce application/json
-// @Param page_num query int true "页码" minimum(1)
-// @Param page_size query int true "每页数量" minimum(1) maximum(50)
-// @Param name query string false "教练姓名"
-// @Param occupation query string false "职业/专长"
-// @Success 200 {object} Response{data=PageResult{list=[]model.Coach}}
-// @Router /api/coach/list [get]
+// CoachQuery 教练查询参数
+type CoachQuery struct {
+	Page int    `form:"page_num" binding:"required,min=1"`
+	Size int    `form:"page_size" binding:"required,min=1,max=50"`
+	Name string `form:"name"`
+}
+
+// CoachVO 教练前端展示数据结构
+type AdminCoachVO struct {
+	ID       int       `json:"id"`
+	Name     string    `json:"name" `
+	Phone    string    `json:"phone" `
+	Desc     string    `json:"desc" `
+	Avatar   string    `json:"avatar"`
+	JoinTime time.Time `json:"join_time" `
+}
+
 func (*Coach) GetList(c *gin.Context) {
-	var query model.CoachQuery
+	var query CoachQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
 		ReturnError(c, g.ErrRequest, err)
 		return
 	}
 
-	list, total, err := model.GetCoachList(GetDB(c), query.Page, query.Size, query.Name, query.Occupation)
+	coachs, total, err := model.GetAdminCoachList(GetDB(c), query.Page, query.Size, query.Name)
 	if err != nil {
 		ReturnError(c, g.ErrDbOp, err)
 		return
 	}
+	list := make([]AdminCoachVO, 0, len(coachs))
+	for _, coach := range coachs {
+		list = append(list, AdminCoachVO{
+			ID:       coach.ID,
+			Name:     coach.Name,
+			Phone:    coach.Phone,
+			Desc:     coach.Desc,
+			Avatar:   coach.Avatar,
+			JoinTime: coach.CreatedAt,
+		})
+	}
 
-	ReturnSuccess(c, PageResult[model.Coach]{
+	ReturnSuccess(c, PageResult[AdminCoachVO]{
 		Total: total,
 		List:  list,
 		Size:  query.Size,
@@ -73,13 +89,13 @@ func (*Coach) GetList(c *gin.Context) {
 // @Router /api/front/coach/list [get]
 
 func (*Front) GetCoachList(c *gin.Context) {
-	var query model.CoachQuery
+	var query CoachQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
 		ReturnError(c, g.ErrRequest, err)
 		return
 	}
 
-	list, total, err := model.GetCoachList(GetDB(c), query.Page, query.Size, query.Name, query.Occupation)
+	list, total, err := model.GetCoachList(GetDB(c), query.Page, query.Size, query.Name)
 	if err != nil {
 		ReturnError(c, g.ErrDbOp, err)
 		return

@@ -16,8 +16,7 @@ defineOptions({ name: '教练列表' })
 const $table = ref(null)
 const queryItems = ref({
   name: '',
-  specialty: '',
-  status: null,
+  // 根据CoachQuery结构更新查询参数
 })
 
 const {
@@ -33,18 +32,7 @@ const {
   refresh: () => $table.value?.handleSearch(),
 })
 
-// 教练状态选项
-const statusOptions = [
-  { label: '在职', value: 1 },
-  { label: '离职', value: 2 },
-  { label: '休假', value: 3 },
-]
-
-const statusMap = {
-  1: { name: '在职', tag: 'success' },
-  2: { name: '离职', tag: 'error' },
-  3: { name: '休假', tag: 'warning' },
-}
+// 教练相关配置已根据AdminCoachVO结构更新
 
 onMounted(() => {
   $table.value?.handleSearch()
@@ -83,13 +71,6 @@ const columns = [
     },
   },
   {
-    title: '专长',
-    key: 'specialty',
-    width: 80,
-    align: 'center',
-    ellipsis: { tooltip: true },
-  },
-  {
     title: '电话',
     key: 'phone',
     width: 70,
@@ -97,24 +78,20 @@ const columns = [
     ellipsis: { tooltip: true },
   },
   {
-    title: '状态',
-    key: 'status',
-    width: 40,
-    align: 'center',
-    render(row) {
-      return h(
-        NTag,
-        { type: statusMap[row.status]?.tag },
-        { default: () => statusMap[row.status]?.name || '未知' },
-      )
-    },
-  },
-  {
-    title: '简介',
-    key: 'description',
+    title: '描述',
+    key: 'desc',
     width: 100,
     align: 'center',
     ellipsis: { tooltip: true },
+  },
+  {
+    title: '加入时间',
+    key: 'join_time',
+    width: 120,
+    align: 'center',
+    render(row) {
+      return h('span', formatDate(row.join_time))
+    },
   },
   {
     title: '创建时间',
@@ -204,92 +181,46 @@ async function handleUpdateDisable(row) {
       :get-data="api.getCoaches"
     >
       <template #queryBar>
-        <QueryItem label="姓名" :label-width="40" :content-width="160">
-          <NInput
-            v-model:value="queryItems.name"
-            clearable
-            type="text"
-            placeholder="请输入姓名"
-            @keydown.enter="$table?.handleSearch()"
-          />
-        </QueryItem>
-        <QueryItem label="专长" :label-width="40" :content-width="160">
-          <NInput
-            v-model:value="queryItems.specialty"
-            clearable
-            type="text"
-            placeholder="请输入专长"
-            @keydown.enter="$table?.handleSearch()"
-          />
-        </QueryItem>
-        <QueryItem label="状态" :label-width="40" :content-width="160">
-          <NSelect
-            v-model:value="queryItems.status"
-            clearable
-            filterable
-            placeholder="请选择状态"
-            :options="statusOptions"
-            @update:value="$table?.handleSearch()"
-          />
+        <QueryItem label="教练姓名" :label-width="80">
+          <NInput v-model:value="queryItems.name" clearable placeholder="请输入教练姓名" />
         </QueryItem>
       </template>
     </CrudTable>
 
     <CrudModal
       v-model:visible="modalVisible"
-      title="修改教练"
       :loading="modalLoading"
+      title="教练详情"
       @save="handleSave"
     >
       <NForm
         ref="modalFormRef"
-        label-placement="left"
-        label-align="left"
-        :label-width="80"
         :model="modalForm"
+        label-placement="left"
+        label-width="auto"
+        require-mark-placement="right-hanging"
+        :style="{
+          maxWidth: '640px',
+        }"
       >
         <NFormItem label="姓名" path="name">
-          <NInput
-            v-model:value="modalForm.name"
-            clearable
-            placeholder="请输入姓名"
-          />
-        </NFormItem>
-        <NFormItem label="性别" path="gender">
-          <NSelect
-            v-model:value="modalForm.gender"
-            :options="[{ label: '男', value: 1 }, { label: '女', value: 2 }]"
-            placeholder="请选择性别"
-          />
-        </NFormItem>
-        <NFormItem label="专长" path="specialty">
-          <NInput
-            v-model:value="modalForm.specialty"
-            clearable
-            placeholder="请输入专长"
-          />
+          <NInput v-model:value="modalForm.name" />
         </NFormItem>
         <NFormItem label="电话" path="phone">
-          <NInput
-            v-model:value="modalForm.phone"
-            clearable
-            placeholder="请输入电话"
-          />
+          <NInput v-model:value="modalForm.phone" />
         </NFormItem>
-        <NFormItem label="状态" path="status">
-          <NSelect
-            v-model:value="modalForm.status"
-            :options="statusOptions"
-            placeholder="请选择状态"
-          />
+        <NFormItem label="头像" path="avatar">
+          <NInput v-model:value="modalForm.avatar" />
         </NFormItem>
-        <NFormItem label="简介" path="description">
+        <NFormItem label="描述" path="desc">
           <NInput
-            v-model:value="modalForm.description"
+            v-model:value="modalForm.desc"
             type="textarea"
-            clearable
-            placeholder="请输入简介"
+            placeholder="请输入描述信息"
           />
+        </NFormItem>
+        <NFormItem label="加入时间" path="join_time">
+          <NInput v-model:value="modalForm.join_time" disabled />
         </NFormItem>
       </NForm>
     </CrudModal>

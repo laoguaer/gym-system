@@ -24,8 +24,8 @@ type Course struct {
 
 // CourseQuery 课程查询参数
 type CourseQuery struct {
-	Page     int    `form:"page" binding:"required,min=1"`
-	Size     int    `form:"size" binding:"required,min=1,max=50"`
+	Page     int    `form:"page_num" binding:"required,min=1"`
+	Size     int    `form:"page_size" binding:"required,min=1,max=50"`
 	Title    string `form:"title"`
 	CoachID  int    `form:"coach_id"`
 	TagID    int    `form:"tag_id"`

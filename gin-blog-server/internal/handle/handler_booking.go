@@ -14,6 +14,68 @@ import (
 
 type Booking struct{}
 
+// BookingQuery 预约查询参数
+type BookingQuery struct {
+	Page     int    `form:"page_num"`  // 当前页数（从1开始）
+	Size     int    `form:"page_size"` // 每页条数
+	UserID   int    `form:"user_id"`
+	CourseID int    `form:"course_id"`
+	Status   int    `form:"status"`
+	Date     string `form:"date"`
+}
+
+func (*Booking) GetList(c *gin.Context) {
+	var query BookingQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		ReturnError(c, g.ErrRequest, err)
+		return
+	}
+
+	// 构建查询条件
+	db := GetDB(c).Model(&model.Booking{})
+
+	// 应用过滤条件
+	if query.UserID > 0 {
+		db = db.Where("user_id = ?", query.UserID)
+	}
+
+	if query.CourseID > 0 {
+		db = db.Where("course_id = ?", query.CourseID)
+	}
+
+	if query.Status > 0 {
+		db = db.Where("status = ?", query.Status)
+	}
+
+	if query.Date != "" {
+		date, err := time.Parse("2006-01-02", query.Date)
+		if err == nil {
+			db = db.Where("DATE(start_time) = DATE(?)", date)
+		}
+	}
+
+	// 获取总数
+	var total int64
+	if err := db.Count(&total).Error; err != nil {
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
+
+	// 获取分页数据
+	var bookings []model.Booking
+	if err := db.Order("start_time DESC").Limit(query.Size).Offset((query.Page - 1) * query.Size).Find(&bookings).Error; err != nil {
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
+
+	ReturnSuccess(c, PageResult[model.Booking]{
+		Total: total,
+		List:  bookings,
+		Size:  query.Size,
+		Page:  query.Page,
+	})
+}
+
 type GetUserBookingWithDayQuery struct {
 	UserID int
 	Day    string

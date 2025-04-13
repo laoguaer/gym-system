@@ -19,22 +19,14 @@ type Coach struct {
 	DeletedAt  gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 }
 
-// CoachQuery 教练查询参数
-type CoachQuery struct {
-	Page       int    `form:"page" binding:"required,min=1"`
-	Size       int    `form:"size" binding:"required,min=1,max=50"`
-	Name       string `form:"name"`
-	Occupation string `form:"occupation"`
+func GetAdminCoachList(db *gorm.DB, page, size int, name string) (AdminCoachVO []Coach, total int64, err error) {
+	return GetCoachList(db, page, size, name)
 }
 
 // GetCoachList 获取教练列表
-func GetCoachList(db *gorm.DB, page, size int, name, occupation string) (list []Coach, total int64, err error) {
+func GetCoachList(db *gorm.DB, page, size int, name string) (list []Coach, total int64, err error) {
 	if name != "" {
 		db = db.Where("name LIKE ?", "%"+name+"%")
-	}
-
-	if occupation != "" {
-		db = db.Where("occupation LIKE ?", "%"+occupation+"%")
 	}
 
 	// 获取总数
