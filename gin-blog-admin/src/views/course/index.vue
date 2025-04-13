@@ -55,7 +55,7 @@ onMounted(async () => {
   $table.value?.handleSearch()
   try {
     // 获取教练选项 - 使用page和page_size参数，与CrudTable组件保持一致
-    const coachResp = await api.getCoaches({ page: 1, page_size: 10 })
+    const coachResp = await api.getCoaches({ page_num: 1, page_size: 10 })
     if (coachResp && coachResp.data) {
       coachOptions.value = coachResp.data.list.map(coach => ({
         label: coach.name,

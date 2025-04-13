@@ -55,73 +55,73 @@ onMounted(() => {
 const columns = [
   {
     title: '预约ID',
-    key: 'id',
+    key: 'Id',
     width: 60,
     align: 'center',
     ellipsis: { tooltip: true },
   },
   {
     title: '用户ID',
-    key: 'user_id',
+    key: 'UserID',
     width: 80,
     align: 'center',
     ellipsis: { tooltip: true },
   },
   {
     title: '课程ID',
-    key: 'course_id',
+    key: 'CourseID',
     width: 80,
     align: 'center',
     ellipsis: { tooltip: true },
   },
   {
     title: '教练ID',
-    key: 'coach_id',
+    key: 'CoachID',
     width: 80,
     align: 'center',
     ellipsis: { tooltip: true },
   },
   {
     title: '课程标题',
-    key: 'course_title',
+    key: 'CourseTitle',
     width: 120,
     align: 'center',
     ellipsis: { tooltip: true },
   },
   {
     title: '预约状态',
-    key: 'status',
+    key: 'Status',
     width: 80,
     align: 'center',
     render(row) {
       return h(
         NTag,
-        { type: statusMap[row.status]?.tag },
-        { default: () => statusMap[row.status]?.name || '未知' },
+        { type: statusMap[row.Status]?.tag },
+        { default: () => statusMap[row.Status]?.name || '未知' },
       )
     },
   },
   {
     title: '开始时间',
-    key: 'start_time',
+    key: 'StartTime',
     align: 'center',
     width: 150,
     render(row) {
-      return h('span', row.start_time)
+      return h('span', row.StartTime)
     },
   },
   {
     title: '结束时间',
-    key: 'end_time',
+    key: 'EndTime',
     align: 'center',
     width: 150,
     render(row) {
-      return h('span', row.end_time)
+      return h('span', row.EndTime)
     },
   },
   {
     title: '创建时间',
-    key: 'created_at',
+    key: 'CreatedAt',
     align: 'center',
     width: 150,
     render(row) {
@@ -129,7 +129,7 @@ const columns = [
         NButton,
         { size: 'small', type: 'text', ghost: true },
         {
-          default: () => row.created_at,
+          default: () => row.CreatedAt,
           icon: () => h('i', { class: 'i-mdi:update' }),
         },
       )
@@ -145,14 +145,14 @@ const columns = [
       const actions = []
 
       // 待审核状态可以确认或取消
-      if (row.status === 1) {
+      if (row.Status === 1) {
         actions.push(
           h(
             NButton,
             {
               size: 'small',
               type: 'success',
-              onClick: () => handleUpdateStatus(row.id, 2),
+              onClick: () => handleUpdateStatus(row.Id, 2),
             },
             {
               default: () => '确认',
@@ -165,7 +165,7 @@ const columns = [
               size: 'small',
               type: 'error',
               style: 'margin-left: 10px;',
-              onClick: () => handleUpdateStatus(row.id, 3),
+              onClick: () => handleUpdateStatus(row.Id, 3),
             },
             {
               default: () => '取消',
@@ -176,14 +176,14 @@ const columns = [
       }
 
       // 已确认状态可以标记为完成
-      if (row.status === 2) {
+      if (row.Status === 2) {
         actions.push(
           h(
             NButton,
             {
               size: 'small',
               type: 'info',
-              onClick: () => handleUpdateStatus(row.id, 4),
+              onClick: () => handleUpdateStatus(row.Id, 4),
             },
             {
               default: () => '完成',
@@ -277,29 +277,29 @@ async function handleUpdateStatus(id, status) {
           maxWidth: '640px',
         }"
       >
-        <NFormItem label="用户ID" path="user_id">
-          <NInput v-model:value="modalForm.user_id" disabled />
+        <NFormItem label="用户ID" path="UserID">
+          <NInput v-model:value="modalForm.UserID" disabled />
         </NFormItem>
-        <NFormItem label="课程ID" path="course_id">
-          <NInput v-model:value="modalForm.course_id" disabled />
+        <NFormItem label="课程ID" path="CourseID">
+          <NInput v-model:value="modalForm.CourseID" disabled />
         </NFormItem>
-        <NFormItem label="教练ID" path="coach_id">
-          <NInput v-model:value="modalForm.coach_id" disabled />
+        <NFormItem label="教练ID" path="CoachID">
+          <NInput v-model:value="modalForm.CoachID" disabled />
         </NFormItem>
-        <NFormItem label="课程标题" path="course_title">
-          <NInput v-model:value="modalForm.course_title" disabled />
+        <NFormItem label="课程标题" path="CourseTitle">
+          <NInput v-model:value="modalForm.CourseTitle" disabled />
         </NFormItem>
-        <NFormItem label="预约状态" path="status">
+        <NFormItem label="预约状态" path="Status">
           <NSelect
-            v-model:value="modalForm.status"
+            v-model:value="modalForm.Status"
             :options="statusOptions"
           />
         </NFormItem>
-        <NFormItem label="开始时间" path="start_time">
-          <NInput v-model:value="modalForm.start_time" disabled />
+        <NFormItem label="开始时间" path="StartTime">
+          <NInput v-model:value="modalForm.StartTime" disabled />
         </NFormItem>
-        <NFormItem label="结束时间" path="end_time">
-          <NInput v-model:value="modalForm.end_time" disabled />
+        <NFormItem label="结束时间" path="EndTime">
+          <NInput v-model:value="modalForm.EndTime" disabled />
         </NFormItem>
       </NForm>
     </CrudModal>
