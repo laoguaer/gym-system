@@ -3,6 +3,7 @@ package model
 import (
 	"time"
 
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -18,20 +19,32 @@ type StudentVO struct {
 }
 
 func GetStudentList(db *gorm.DB, page, size int, name, nickname string) (list []StudentVO, total int64, err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			zap.L().Error("GetStudentList panic", zap.Any("err", err))
+		}
+	}()
 	if name != "" {
 		db = db.Where("username LIKE ?", "%"+name+"%")
 	}
 	ret := []UserAuth{}
-	result := db.Model(&UserAuth{}).
-		Joins("LEFT JOIN user_info ON user_info.id = user_auth.user_info_id").
-		Where("user_info.nickname LIKE ?", "%"+nickname+"%").
-		Preload("UserInfo").
+	result := db.Debug().Model(&UserAuth{}).
+		Joins("LEFT JOIN user_info ON user_info.id = user_auth.user_info_id")
+	if nickname != "" {
+		result = result.Where("nickname LIKE?", "%"+nickname+"%")
+	}
+	err = result.Preload("UserInfo").
 		Preload("Roles").
 		Count(&total).
 		Scopes(Paginate(page, size)).
-		Find(&ret)
+		Find(&ret).Error
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, 0, err
+	}
 	for _, v := range ret {
-		if v.Roles[0].Name == "普通用户" {
+		zap.L().Debug("user", zap.Any("user", v))
+		if len(v.Roles) != 0 && v.Roles[0].ID == 2 {
 			student := StudentVO{
 				ID:        v.UserInfo.ID,
 				CreatedAt: v.UserInfo.CreatedAt,
