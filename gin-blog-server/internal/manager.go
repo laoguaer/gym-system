@@ -202,7 +202,8 @@ func registerAdminHandler(r *gin.Engine) {
 	// 预约模块
 	booking := auth.Group("/booking")
 	{
-		booking.GET("/list", bookingApi.GetList) // 预约列表
+		booking.GET("/list", bookingApi.GetList)        // 预约列表
+		booking.PUT("/status", bookingApi.UpdateStatus) // 更新预约状态
 	}
 }
 

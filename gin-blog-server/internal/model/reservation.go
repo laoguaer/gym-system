@@ -180,6 +180,20 @@ func CheckCourseCapacity(db *gorm.DB, courseID int, startTime, endTime time.Time
 	return int(count) >= course.MaxCapacity, course.MaxCapacity - int(count), nil
 }
 
+// UpdateBookingStatus 更新预约状态
+func UpdateBookingStatus(db *gorm.DB, id int, status int) error {
+	// 检查是否提供了更新条件
+	if id == 0 {
+		return gorm.ErrMissingWhereClause
+	}
+
+	// 使用Model和Where来指定更新条件
+	if err := db.Model(&Booking{}).Where("id = ?", id).Update("status", status).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 // CreateBooking 创建预约记录
 func CreateBooking(db *gorm.DB, booking *Booking) error {
 	// 创建预约记录

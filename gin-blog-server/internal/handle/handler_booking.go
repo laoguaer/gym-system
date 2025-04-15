@@ -325,3 +325,36 @@ func (*Booking) Booking(c *gin.Context) {
 	}
 	ReturnSuccess(c, nil)
 }
+
+type UpdateStatusBody struct {
+	Id     int `json:"id" binding:"required,min=1"`
+	Status int `json:"status" binding:"required,min=0,max=2"`
+}
+
+// UpdateStatus 更新预约状态
+func (*Booking) UpdateStatus(c *gin.Context) {
+	var body UpdateStatusBody
+	if err := c.ShouldBindJSON(&body); err != nil {
+		ReturnError(c, g.ErrRequest, err)
+		return
+	}
+
+	// 检查预约是否存在
+	booking, err := model.GetBookingById(GetDB(c), body.Id)
+	if err != nil {
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
+	if booking == nil {
+		ReturnError(c, g.ErrRequest, "预约不存在")
+		return
+	}
+
+	// 更新预约状态
+	if err := model.UpdateBookingStatus(GetDB(c), body.Id, body.Status); err != nil {
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
+
+	ReturnSuccess(c, nil)
+}

@@ -35,17 +35,15 @@ const {
 
 // 预约状态选项
 const statusOptions = [
-  { label: '待审核', value: 1 },
-  { label: '已确认', value: 2 },
-  { label: '已取消', value: 3 },
-  { label: '已完成', value: 4 },
+  { label: '待确认', value: 0 },
+  { label: '已确认', value: 1 },
+  { label: '已取消', value: 2 },
 ]
 
 const statusMap = {
-  1: { name: '待审核', tag: 'warning' },
-  2: { name: '已确认', tag: 'success' },
-  3: { name: '已取消', tag: 'error' },
-  4: { name: '已完成', tag: 'info' },
+  0: { name: '待确认', tag: 'warning' },
+  1: { name: '已确认', tag: 'success' },
+  2: { name: '已取消', tag: 'error' },
 }
 
 onMounted(() => {
@@ -144,15 +142,15 @@ const columns = [
     render(row) {
       const actions = []
 
-      // 待审核状态可以确认或取消
-      if (row.Status === 1) {
+      // 待确认状态可以确认或取消
+      if (row.Status === 0) {
         actions.push(
           h(
             NButton,
             {
               size: 'small',
               type: 'success',
-              onClick: () => handleUpdateStatus(row.Id, 2),
+              onClick: () => handleUpdateStatus(row.Id, 1),
             },
             {
               default: () => '确认',
@@ -165,7 +163,7 @@ const columns = [
               size: 'small',
               type: 'error',
               style: 'margin-left: 10px;',
-              onClick: () => handleUpdateStatus(row.Id, 3),
+              onClick: () => handleUpdateStatus(row.Id, 2),
             },
             {
               default: () => '取消',
@@ -176,22 +174,22 @@ const columns = [
       }
 
       // 已确认状态可以标记为完成
-      if (row.Status === 2) {
-        actions.push(
-          h(
-            NButton,
-            {
-              size: 'small',
-              type: 'info',
-              onClick: () => handleUpdateStatus(row.Id, 4),
-            },
-            {
-              default: () => '完成',
-              icon: () => h('i', { class: 'i-material-symbols:done-all' }),
-            },
-          ),
-        )
-      }
+      // if (row.Status === 1) {
+      //   actions.push(
+      //     h(
+      //       NButton,
+      //       {
+      //         size: 'small',
+      //         type: 'info',
+      //         onClick: () => handleUpdateStatus(row.Id, 3),
+      //       },
+      //       {
+      //         default: () => '完成',
+      //         icon: () => h('i', { class: 'i-material-symbols:done-all' }),
+      //       },
+      //     ),
+      //   )
+      // }
 
       // 所有状态都可以查看详情
       actions.push(
