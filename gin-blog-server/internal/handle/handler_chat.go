@@ -5,29 +5,17 @@ import (
 	"errors"
 	"fmt"
 	"gin-blog/internal/EinoCompile"
+	"gin-blog/internal/utils"
 	"io"
 	"log"
+	"net/http"
 
 	"github.com/cloudwego/eino/schema"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
+	"github.com/gin-contrib/sse"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
-
-/*
-curl -X POST 'https://api.coze.cn/v1/workflow/stream_run' \
--H "Authorization: Bearer pat_Ozo3WylcPI18kUqTY7wYNucGrjUtQziKsUy73dALUhRTfu0VZmzLktyabPs132hP" \
--H "Content-Type: application/json" \
-
-	-d '{
-	  "parameters": {
-	    "start": "默认"
-	  },
-	  "workflow_id": "7454209939809320995"
-	}'
-
-{"code":0,"cost":"0","data":"{\"content_type\":1,\"data\":\"{\\\"output\\\":\\\"{\\\\\\\"回答\\\\\\\":\\\\\\\"这是默认消息\\\\\\\",\\\\\\\"问题\\\\\\\":\\\\\\\"默认\\\\\\\"}\\\"}\",\"original_result\":null,\"type_for_model\":2}","debug_url":"https://www.coze.cn/work_flow?execute_id=7464449491292700682\u0026space_id=7452369603411329059\u0026workflow_id=7454209939809320995","msg":"Success","token":269}
-*/
 
 type Chat struct{}
 type ChatReq struct {
@@ -43,25 +31,6 @@ type ChatResp struct {
 	Token    int    `json:"token"`
 }
 
-type CozeReq struct {
-	Parameters map[string]string `json:"parameters" binding:"required"`
-	WorkflowId string            `json:"workflow_id" binding:"required"`
-}
-type CozeResp struct {
-	Code     int    `json:"code"`
-	Cost     string `json:"cost"`
-	Data     string `json:"data"`
-	DebugUrl string `json:"debug_url"`
-	Msg      string `json:"msg"`
-	Token    int    `json:"token"`
-}
-type CozeData struct {
-	ContentType    int    `json:"content_type"`
-	Data           string `json:"data"`
-	OriginalResult string `json:"original_result"`
-	TypeForModel   int    `json:"type_for_model"`
-}
-
 func (*Chat) Send(c *gin.Context) {
 	id := c.Query("user_id")
 	message := c.Query("message")
@@ -75,16 +44,43 @@ func (*Chat) Send(c *gin.Context) {
 
 	zap.L().Sugar().Infof("[Chat] Starting chat with ID: %s, Message: %s\n", id, message)
 
-	_, err := RunAgent(c, id, message)
+	// 设置SSE响应头
+	c.Writer.Header().Set("Content-Type", sse.ContentType)
+	c.Writer.Header().Set("Cache-Control", "no-cache")
+	c.Writer.Header().Set("Connection", "keep-alive")
+	c.Writer.Header().Set("Transfer-Encoding", "chunked")
+	c.Writer.WriteHeader(http.StatusOK)
+
+	// 获取消息流
+	sr, err := RunAgent(c, id, message)
 	if err != nil {
 		log.Printf("[Chat] Error running agent: %v\n", err)
-		c.JSON(consts.StatusInternalServerError, map[string]string{
-			"status": "error",
-			"error":  err.Error(),
+		// 发送错误消息
+		err = sse.Encode(c.Writer, sse.Event{
+			Event: "error",
+			Data:  err.Error(),
 		})
+		if err != nil {
+			log.Printf("[Chat] Error encoding SSE event: %v\n", err)
+		}
 		return
 	}
 
+	// 刷新缓冲区，确保头信息被发送
+	c.Writer.Flush()
+
+	// 发送初始连接成功消息
+	err = sse.Encode(c.Writer, sse.Event{
+		Event: "connected",
+		Data:  "SSE连接已建立",
+	})
+	if err != nil {
+		log.Printf("[Chat] Error sending connected event: %v\n", err)
+		return
+	}
+	c.Writer.Flush()
+
+	// 处理消息流
 outer:
 	for {
 		select {
@@ -92,32 +88,88 @@ outer:
 			log.Printf("[Chat] Context done for chat ID: %s\n", id)
 			return
 		default:
-			// msg, err := sr.Recv()
+			msg, err := sr.Recv()
 			if errors.Is(err, io.EOF) {
 				log.Printf("[Chat] EOF received for chat ID: %s\n", id)
+				// 发送结束消息
+				_ = sse.Encode(c.Writer, sse.Event{
+					Event: "done",
+					Data:  "聊天完成",
+				})
+				c.Writer.Flush()
 				break outer
 			}
 			if err != nil {
 				log.Printf("[Chat] Error receiving message: %v\n", err)
+				// 发送错误消息
+				_ = sse.Encode(c.Writer, sse.Event{
+					Event: "error",
+					Data:  err.Error(),
+				})
+				c.Writer.Flush()
 				break outer
 			}
 
-			// err = s.Publish(&sse.Event{
-			// 	Data: []byte(msg.Content),
-			// })
+			// 发送消息内容
+			err = sse.Encode(c.Writer, sse.Event{
+				Event: "message",
+				Data:  msg.Content,
+			})
 			if err != nil {
 				log.Printf("[Chat] Error publishing message: %v\n", err)
 				break outer
 			}
+			c.Writer.Flush()
 		}
 	}
-
-	// log.Printf("chat Request: %v\n response: %v", string(requestBody), apiResp)
-	// c.JSON(http.StatusOK, apiResp)
 }
 
 func (*Chat) GetHistory(c *gin.Context) {
+	id := c.Query("user_id")
+	if id == "" {
+		c.JSON(consts.StatusBadRequest, map[string]string{
+			"status": "error",
+			"error":  "missing user_id parameter",
+		})
+		return
+	}
 
+	zap.L().Sugar().Infof("[Chat] Getting chat history for ID: %s\n", id)
+
+	// 从Redis获取历史会话
+	redisCli := utils.RDB
+	history, err := utils.GetChatHistory(c, redisCli, id)
+	if err != nil {
+		log.Printf("[Chat] Error getting chat history: %v\n", err)
+		c.JSON(consts.StatusInternalServerError, map[string]string{
+			"status": "error",
+			"error":  err.Error(),
+		})
+		return
+	}
+
+	// 将历史记录转换为前端可用的格式
+	type MessageResponse struct {
+		Role    string `json:"role"`
+		Content string `json:"content"`
+	}
+
+	responses := make([]MessageResponse, 0, len(history))
+	for _, msg := range history {
+		role := "assistant"
+		if msg.Role == schema.User {
+			role = "user"
+		}
+		responses = append(responses, MessageResponse{
+			Role:    role,
+			Content: msg.Content,
+		})
+	}
+
+	c.JSON(consts.StatusOK, map[string]interface{}{
+		"status":  "success",
+		"history": responses,
+	})
 }
 
 func RunAgent(ctx context.Context, id string, msg string) (*schema.StreamReader[*schema.Message], error) {
@@ -127,12 +179,25 @@ func RunAgent(ctx context.Context, id string, msg string) (*schema.StreamReader[
 		return nil, fmt.Errorf("failed to build agent graph: %w", err)
 	}
 
-	// conversation := memory.GetConversation(id, true)
+	redisCli := utils.RDB
+
+	// 从Redis获取历史会话
+	history, err := utils.GetChatHistory(ctx, redisCli, id)
+	if err != nil {
+		log.Printf("[Chat] 获取历史会话失败: %v，将使用空历史记录", err)
+		history = []*schema.Message{}
+	}
+
+	// 保存用户消息到Redis
+	err = utils.SaveUserMessage(ctx, redisCli, id, msg)
+	if err != nil {
+		log.Printf("[Chat] 保存用户消息失败: %v", err)
+	}
 
 	userMessage := &EinoCompile.UserMessage{
 		ID:      id,
 		Query:   msg,
-		History: nil,
+		History: history,
 	}
 
 	sr, err := runner.Stream(ctx, userMessage)
@@ -150,15 +215,18 @@ func RunAgent(ctx context.Context, id string, msg string) (*schema.StreamReader[
 			// close stream if you used it
 			srs[1].Close()
 
-			// add user input to history
-			// conversation.Append(schema.UserMessage(msg))
-
-			// fullMsg, err := schema.ConcatMessages(fullMsgs)
+			// 合并所有消息片段
+			fullMsg, err := schema.ConcatMessages(fullMsgs)
 			if err != nil {
 				fmt.Println("error concatenating messages: ", err.Error())
+				return
 			}
-			// add agent response to history
-			// conversation.Append(fullMsg)
+
+			// 保存AI回复到Redis
+			err = utils.SaveAIMessage(ctx, redisCli, id, fullMsg)
+			if err != nil {
+				fmt.Println("保存AI回复到历史记录失败: ", err.Error())
+			}
 		}()
 
 	outer:
@@ -173,8 +241,12 @@ func RunAgent(ctx context.Context, id string, msg string) (*schema.StreamReader[
 					if errors.Is(err, io.EOF) {
 						break outer
 					}
+					// 处理其他错误
+					fmt.Println("接收消息错误:", err.Error())
+					continue
 				}
 
+				// 添加消息片段到完整消息列表
 				fullMsgs = append(fullMsgs, chunk)
 			}
 		}

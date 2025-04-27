@@ -1,8 +1,8 @@
 module gin-blog
 
-go 1.21
+go 1.23
 
-toolchain go1.21.0
+toolchain go1.24.2
 
 require (
 	github.com/cloudwego/eino v0.3.27
@@ -100,7 +100,7 @@ require (
 	github.com/cloudwego/eino-ext/components/retriever/redis v0.0.0-20250424061409-ccd60fbc7c1c
 	github.com/cloudwego/eino-ext/components/tool/duckduckgo v0.0.0-20250424061409-ccd60fbc7c1c
 	github.com/gin-contrib/sessions v0.0.5
-	github.com/gin-contrib/sse v0.1.0 // indirect
+	github.com/gin-contrib/sse v1.1.0 // indirect
 	github.com/go-redis/redis/v9 v9.0.0-rc.1
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect

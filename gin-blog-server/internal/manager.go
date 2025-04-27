@@ -251,7 +251,8 @@ func registerBlogHandler(r *gin.Engine) {
 	}
 	chat := base.Group("/chat")
 	{
-		chat.POST("/send", chatAPI.Send) // 前台聊天列表
+		chat.GET("/send", chatAPI.Send) // 前台聊天列表
+		chat.GET("/history", chatAPI.GetHistory)
 	}
 	coach := base.Group("/coach")
 	{
