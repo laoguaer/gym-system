@@ -2,13 +2,13 @@ package EinoCompile
 
 import (
 	"context"
-	"gin-blog/internal/handle"
 	"gin-blog/internal/model"
+
+	utils2 "gin-blog/internal/utils"
 
 	"github.com/cloudwego/eino-ext/components/tool/duckduckgo"
 	"github.com/cloudwego/eino/components/tool"
 	"github.com/cloudwego/eino/components/tool/utils"
-	"github.com/gin-gonic/gin"
 )
 
 func newTool(ctx context.Context) (bt tool.BaseTool, err error) {
@@ -50,7 +50,7 @@ func (t *CourseToolImpl) Invoke(ctx context.Context, req *CourseTaskRequest) (re
 	resp = &CourseTaskResponse{}
 	switch req.Action {
 	case GetCourse:
-		resp.CouresList, _, err = model.GetCourseList(handle.GetDB(ctx.(*gin.Context)), 0, 100, req.CourseName, 0, 0, nil)
+		resp.CouresList, _, err = model.GetCourseList(utils2.DB, 0, 100, req.CourseName, 0, 0, nil)
 		if err != nil {
 			resp.Status = "failed"
 			return nil, err

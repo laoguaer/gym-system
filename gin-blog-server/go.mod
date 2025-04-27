@@ -6,6 +6,7 @@ toolchain go1.21.0
 
 require (
 	github.com/cloudwego/eino v0.3.27
+	github.com/cloudwego/hertz v0.9.7
 	github.com/coze-dev/coze-go v0.0.0-20250123133019-5259c14934f1
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.9.1
@@ -13,6 +14,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/k3a/html2text v1.2.1
 	github.com/qiniu/go-sdk/v7 v7.13.0
+	github.com/redis/go-redis/v9 v9.7.0
 	github.com/spf13/viper v1.13.0
 	github.com/stretchr/testify v1.10.0
 	github.com/swaggo/files v1.0.1
@@ -73,7 +75,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/quasoft/memstore v0.0.0-20191010062613-2bce066d2b0b // indirect
-	github.com/redis/go-redis/v9 v9.7.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/slongfield/pyfmt v0.0.0-20220222012616-ea85ff4c361f // indirect

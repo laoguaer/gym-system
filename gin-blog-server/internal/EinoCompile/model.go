@@ -2,24 +2,18 @@ package EinoCompile
 
 import (
 	"context"
-	"errors"
-	"gin-blog/internal/handle"
 
 	model2 "gin-blog/internal/model"
+	"gin-blog/internal/utils"
 
 	"github.com/cloudwego/eino-ext/components/model/ark"
 	"github.com/cloudwego/eino/components/model"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
 func newChatModel(ctx context.Context) (cm model.ChatModel, err error) {
-	ginCtx, ok := ctx.(*gin.Context)
-	if !ok {
-		return nil, errors.New("上下文类型错误：需要 *gin.Context 类型")
-	}
 
-	configMap, err := model2.GetConfigMap(handle.GetDB(ginCtx))
+	configMap, err := model2.GetConfigMap(utils.DB)
 	if err != nil {
 		zap.L().Error("获取配置失败", zap.Error(err))
 		return

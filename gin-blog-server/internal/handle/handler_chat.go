@@ -1,11 +1,14 @@
 package handle
 
 import (
+	"context"
 	"errors"
-	"gin-blog/internal/model"
+	"fmt"
+	"gin-blog/internal/EinoCompile"
 	"io"
 	"log"
 
+	"github.com/cloudwego/eino/schema"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -72,7 +75,7 @@ func (*Chat) Send(c *gin.Context) {
 
 	zap.L().Sugar().Infof("[Chat] Starting chat with ID: %s, Message: %s\n", id, message)
 
-	sr, err := model.RunAgent(c, id, message)
+	_, err := RunAgent(c, id, message)
 	if err != nil {
 		log.Printf("[Chat] Error running agent: %v\n", err)
 		c.JSON(consts.StatusInternalServerError, map[string]string{
@@ -89,7 +92,7 @@ outer:
 			log.Printf("[Chat] Context done for chat ID: %s\n", id)
 			return
 		default:
-			msg, err := sr.Recv()
+			// msg, err := sr.Recv()
 			if errors.Is(err, io.EOF) {
 				log.Printf("[Chat] EOF received for chat ID: %s\n", id)
 				break outer
@@ -115,4 +118,67 @@ outer:
 
 func (*Chat) GetHistory(c *gin.Context) {
 
+}
+
+func RunAgent(ctx context.Context, id string, msg string) (*schema.StreamReader[*schema.Message], error) {
+
+	runner, err := EinoCompile.BuildMy(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to build agent graph: %w", err)
+	}
+
+	// conversation := memory.GetConversation(id, true)
+
+	userMessage := &EinoCompile.UserMessage{
+		ID:      id,
+		Query:   msg,
+		History: nil,
+	}
+
+	sr, err := runner.Stream(ctx, userMessage)
+	if err != nil {
+		return nil, fmt.Errorf("failed to stream: %w", err)
+	}
+
+	srs := sr.Copy(2)
+
+	go func() {
+		// for save to memory
+		fullMsgs := make([]*schema.Message, 0)
+
+		defer func() {
+			// close stream if you used it
+			srs[1].Close()
+
+			// add user input to history
+			// conversation.Append(schema.UserMessage(msg))
+
+			// fullMsg, err := schema.ConcatMessages(fullMsgs)
+			if err != nil {
+				fmt.Println("error concatenating messages: ", err.Error())
+			}
+			// add agent response to history
+			// conversation.Append(fullMsg)
+		}()
+
+	outer:
+		for {
+			select {
+			case <-ctx.Done():
+				fmt.Println("context done", ctx.Err())
+				return
+			default:
+				chunk, err := srs[1].Recv()
+				if err != nil {
+					if errors.Is(err, io.EOF) {
+						break outer
+					}
+				}
+
+				fullMsgs = append(fullMsgs, chunk)
+			}
+		}
+	}()
+
+	return srs[0], nil
 }

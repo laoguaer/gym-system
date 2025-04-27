@@ -2,11 +2,8 @@ package EinoCompile
 
 import (
 	"context"
-	"errors"
-	"gin-blog/internal/handle"
 	"gin-blog/internal/model"
-
-	"github.com/gin-gonic/gin"
+	"gin-blog/internal/utils"
 
 	"github.com/cloudwego/eino-ext/components/embedding/ark"
 	"github.com/cloudwego/eino/components/embedding"
@@ -14,12 +11,8 @@ import (
 )
 
 func newEmbedding(ctx context.Context) (eb embedding.Embedder, err error) {
-	ginCtx, ok := ctx.(*gin.Context)
-	if !ok {
-		return nil, errors.New("上下文类型错误：需要 *gin.Context 类型")
-	}
 
-	configMap, err := model.GetConfigMap(handle.GetDB(ginCtx))
+	configMap, err := model.GetConfigMap(utils.DB)
 	if err != nil {
 		zap.L().Error("获取配置失败", zap.Error(err))
 		return

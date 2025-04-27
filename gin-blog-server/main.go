@@ -5,6 +5,7 @@ import (
 	ginblog "gin-blog/internal"
 	g "gin-blog/internal/global"
 	"gin-blog/internal/middleware"
+	"gin-blog/internal/utils"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -19,8 +20,8 @@ func main() {
 	conf := g.ReadConfig(*configPath)
 
 	_ = ginblog.InitLogger(conf)
-	db := ginblog.InitDatabase(conf)
-	rdb := ginblog.InitRedis(conf)
+	utils.DB = ginblog.InitDatabase(conf)
+	utils.RDB = ginblog.InitRedis(conf)
 
 	// 初始化 gin 服务
 	gin.SetMode(conf.Server.Mode)
@@ -35,8 +36,8 @@ func main() {
 		r.Use(middleware.ShowResponse()) // 将 logPostRequestBody 放在自定义 Logger 之后
 	}
 	r.Use(middleware.CORS())
-	r.Use(middleware.WithGormDB(db))
-	r.Use(middleware.WithRedisDB(rdb))
+	r.Use(middleware.WithGormDB(utils.DB))
+	r.Use(middleware.WithRedisDB(utils.RDB))
 	r.Use(middleware.WithCookieStore(conf.Session.Name, conf.Session.Salt))
 	ginblog.RegisterHandlers(r)
 
