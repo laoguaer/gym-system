@@ -1,5 +1,5 @@
 <script setup>
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import api from '@/api'
 import { useAppStore, useUserStore } from '@/store'
 
@@ -7,6 +7,7 @@ const messages = ref([])
 const userInput = ref('')
 const isSending = ref(false) // 用于跟踪是否正在发送消息
 const inputRef = ref(null) // 用于引用输入框
+const eventSource = ref(null) // 用于存储SSE连接
 
 const messageMap = {
   login: '<button class="login-btn" onclick="appStore.setLoginFlag(true)">登录</button>',
@@ -20,8 +21,21 @@ onMounted(() => {
   messages.value.push({ type: 'bot', text: getSystemMessage('welcome') })
 })
 
+// 组件卸载时关闭SSE连接
+onUnmounted(() => {
+  closeEventSource()
+})
+
 function getSystemMessage(key) {
   return messageMap[key] || '未知消息类型' // 默认返回未知消息
+}
+
+// 关闭SSE连接
+function closeEventSource() {
+  if (eventSource.value) {
+    eventSource.value.close()
+    eventSource.value = null
+  }
 }
 
 const userStore = useUserStore() // 获取用户状态
@@ -42,25 +56,88 @@ async function sendMessage() {
     // 添加用户消息到聊天
     messages.value.push({ type: 'user', text: input })
 
-    // 调用后端API
-    const response = await api.chatWithBot({ chat_string: input })
-    console.log('API 响应:', response)
-    const resp = JSON.parse(response) // 确保这里的response是有效的JSON
-    const output = resp.data // 直接使用data字段
-    // 添加机器人回复到聊天
-    messages.value.push({ type: 'bot', text: output }) // 直接使用output
+    // 关闭之前的SSE连接（如果有）
+    closeEventSource()
+
+    // 创建SSE连接
+    const apiUrl = `/api/front/chat/send?user_id=${encodeURIComponent(userStore.userId)}&message=${encodeURIComponent(input)}`
+    eventSource.value = new EventSource(apiUrl)
+
+    // 处理连接成功事件
+    eventSource.value.addEventListener('connected', (event) => {
+      console.log('SSE连接已建立:', event.data)
+    })
+
+    // 处理消息事件
+    eventSource.value.addEventListener('message', (event) => {
+      try {
+        const data = event.data
+        console.log('SSE消息:', data)
+        // 如果是第一条消息，添加一个新的机器人回复
+        if (!messages.value.find(m => m.type === 'bot' && m.isCurrentResponse)) {
+          messages.value.push({
+            type: 'bot',
+            text: data.Content || data.content || data,
+            isCurrentResponse: true,
+          })
+        }
+        else {
+          // 更新最后一条机器人消息
+          const lastBotMessage = messages.value.find(m => m.type === 'bot' && m.isCurrentResponse)
+          if (lastBotMessage) {
+            lastBotMessage.text = data.Content || data.content || data
+          }
+        }
+
+        // 滚动到底部
+        nextTick(() => {
+          scrollToBottom()
+        })
+      }
+      catch (error) {
+        console.error('解析SSE消息时出错:', error)
+      }
+    })
+
+    // 处理错误事件
+    eventSource.value.addEventListener('error', (event) => {
+      try {
+        const data = JSON.parse(event.data)
+        console.error('SSE错误事件:', data)
+        messages.value.push({ type: 'system', text: data || getSystemMessage('error') })
+      }
+      catch (error) {
+        console.error('SSE连接错误:', error)
+        messages.value.push({ type: 'system', text: getSystemMessage('error') })
+      }
+      closeEventSource()
+      isSending.value = false
+    })
+
+    // 处理完成事件
+    eventSource.value.addEventListener('done', (event) => {
+      console.log('聊天完成:', event.data)
+      // 移除当前响应标记
+      const lastBotMessage = messages.value.find(m => m.type === 'bot' && m.isCurrentResponse)
+      if (lastBotMessage) {
+        delete lastBotMessage.isCurrentResponse
+      }
+      isSending.value = false
+      closeEventSource()
+    })
+
+    // 处理SSE错误
+    eventSource.value.onerror = (error) => {
+      console.error('SSE连接错误:', error)
+      messages.value.push({ type: 'system', text: getSystemMessage('error') })
+      closeEventSource()
+      isSending.value = false
+    }
   }
   catch (error) {
     console.error('与机器人通信时出错:', error)
     messages.value.push({ type: 'system', text: getSystemMessage('error') })
-  }
-  finally {
-    // 等待 DOM 更新后滚动到底部
-    isSending.value = false // 消息发送完成
-    await nextTick(() => {
-      scrollToBottom()
-      inputRef.value?.focus() // 重新聚焦到输入框
-    })
+    isSending.value = false
   }
 }
 
@@ -218,7 +295,7 @@ function scrollToBottom() {
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
-.bot {
+.assist {
   margin-right: auto;
   text-align: left;
 }
