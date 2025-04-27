@@ -29,17 +29,17 @@ type CourseToolConfig struct {
 type CourseAction string
 
 const (
-	GetCourse CourseAction = "get"
+	GetCourse CourseAction = "getCourse"
 )
 
 type CourseTaskRequest struct {
-	Action            CourseAction
-	CourseName        string
-	CourseDescription string
+	Action            CourseAction `json:"action" jsonschema:"description=action to perform, enum:getCourse"`
+	CourseName        string       `json:"courseName" jsonschema:"description=课程名称"`
+	CourseDescription string       `json:"courseDescription" jsonschema:"description=模糊信息检索"`
 }
 type CourseTaskResponse struct {
-	Status     string
-	CouresList []model.CourseVO
+	Status     string           `json:"status" jsonschema:"description=status of the response"`
+	CouresList []model.CourseVO `json:"courseList" jsonschema:"description=查询到的课程列表"`
 }
 
 func (t *CourseToolImpl) ToEinoTool() (tool tool.BaseTool, err error) {

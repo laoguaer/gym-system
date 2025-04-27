@@ -100,7 +100,7 @@ require (
 	github.com/cloudwego/eino-ext/components/retriever/redis v0.0.0-20250424061409-ccd60fbc7c1c
 	github.com/cloudwego/eino-ext/components/tool/duckduckgo v0.0.0-20250424061409-ccd60fbc7c1c
 	github.com/gin-contrib/sessions v0.0.5
-	github.com/gin-contrib/sse v1.1.0 // indirect
+	github.com/gin-contrib/sse v1.1.0
 	github.com/go-redis/redis/v9 v9.0.0-rc.1
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect

@@ -8,6 +8,7 @@ const userInput = ref('')
 const isSending = ref(false) // 用于跟踪是否正在发送消息
 const inputRef = ref(null) // 用于引用输入框
 const eventSource = ref(null) // 用于存储SSE连接
+const userStore = useUserStore() // 获取用户状态
 
 const messageMap = {
   login: '<button class="login-btn" onclick="appStore.setLoginFlag(true)">登录</button>',
@@ -16,9 +17,40 @@ const messageMap = {
   // 添加更多消息类型
 }
 
-// 初始欢迎消息
-onMounted(() => {
-  messages.value.push({ type: 'bot', text: getSystemMessage('welcome') })
+// 初始化消息和获取历史记录
+onMounted(async () => {
+  // 如果用户已登录，获取历史消息
+  if (userStore.userId) {
+    try {
+      const response = await fetch(`/api/front/chat/history?user_id=${userStore.userId}`)
+      const data = await response.json()
+
+      if (data.status === 'success' && data.history && data.history.length > 0) {
+        // 将历史消息转换为组件内部格式并添加到消息数组
+        data.history.forEach((item) => {
+          const type = item.role === 'user' ? 'user' : 'assistant'
+          messages.value.push({ type, text: item.content })
+        })
+      }
+      else {
+        // 如果没有历史消息，显示欢迎消息
+        messages.value.push({ type: 'assistant', text: getSystemMessage('welcome') })
+      }
+      // 滚动到底部
+      nextTick(() => {
+        scrollToBottom()
+      })
+    }
+    catch (error) {
+      console.error('获取聊天历史失败:', error)
+      // 出错时显示欢迎消息
+      messages.value.push({ type: 'assistant', text: getSystemMessage('welcome') })
+    }
+  }
+  else {
+    // 用户未登录，显示欢迎消息
+    messages.value.push({ type: 'assistant', text: getSystemMessage('welcome') })
+  }
 })
 
 // 组件卸载时关闭SSE连接
@@ -37,15 +69,13 @@ function closeEventSource() {
     eventSource.value = null
   }
 }
-
-const userStore = useUserStore() // 获取用户状态
 async function sendMessage() {
   try {
     if (userInput.value.trim() === '' || isSending.value)
       return
     if (!userStore.userId) {
     // 如果用户未登录, 发送一个系统的消息
-      messages.value.push({ type: 'bot', text: '使用客服功能请先点击下面按钮进行登录哦' })
+      messages.value.push({ type: 'assistant', text: '使用客服功能请先点击下面按钮进行登录哦' })
       messages.value.push({ type: 'system', text: getSystemMessage('login') })
       return
     }
@@ -74,19 +104,15 @@ async function sendMessage() {
         const data = event.data
         console.log('SSE消息:', data)
         // 如果是第一条消息，添加一个新的机器人回复
-        if (!messages.value.find(m => m.type === 'bot' && m.isCurrentResponse)) {
+        if (messages.value[messages.value.length - 1].type !== 'assistant') {
           messages.value.push({
-            type: 'bot',
-            text: data.Content || data.content || data,
-            isCurrentResponse: true,
+            type: 'assistant',
+            text: data,
           })
         }
         else {
           // 更新最后一条机器人消息
-          const lastBotMessage = messages.value.find(m => m.type === 'bot' && m.isCurrentResponse)
-          if (lastBotMessage) {
-            lastBotMessage.text = data.Content || data.content || data
-          }
+          messages.value[messages.value.length - 1].text += data
         }
 
         // 滚动到底部
@@ -102,7 +128,7 @@ async function sendMessage() {
     // 处理错误事件
     eventSource.value.addEventListener('error', (event) => {
       try {
-        const data = JSON.parse(event.data)
+        const data = event.data
         console.error('SSE错误事件:', data)
         messages.value.push({ type: 'system', text: data || getSystemMessage('error') })
       }
@@ -118,7 +144,7 @@ async function sendMessage() {
     eventSource.value.addEventListener('done', (event) => {
       console.log('聊天完成:', event.data)
       // 移除当前响应标记
-      const lastBotMessage = messages.value.find(m => m.type === 'bot' && m.isCurrentResponse)
+      const lastBotMessage = messages.value.find(m => m.type === 'assistant' && m.isCurrentResponse)
       if (lastBotMessage) {
         delete lastBotMessage.isCurrentResponse
       }
@@ -300,7 +326,7 @@ function scrollToBottom() {
   text-align: left;
 }
 
-.bot .message-content {
+.assistant .message-content {
   background-color: white;
   color: #333;
   border-top-left-radius: 4px;
