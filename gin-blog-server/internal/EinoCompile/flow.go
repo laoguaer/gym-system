@@ -23,11 +23,11 @@ func newLambda1(ctx context.Context) (lba *compose.Lambda, err error) {
 	if err != nil {
 		return nil, err
 	}
-	toolIns22, err := newTool1(ctx)
+	courseTool, err := newCourseTool()
 	if err != nil {
 		return nil, err
 	}
-	config.ToolsConfig.Tools = []tool.BaseTool{toolIns21, toolIns22}
+	config.ToolsConfig.Tools = []tool.BaseTool{toolIns21, courseTool}
 	ins, err := react.NewAgent(ctx, config)
 	if err != nil {
 		return nil, err
