@@ -33,6 +33,7 @@ func newTool1(ctx context.Context) (bt tool.BaseTool, err error) {
 }
 
 func (impl *Tool1Impl) Info(ctx context.Context) (*schema.ToolInfo, error) {
+	
 	panic("implement me")
 }
 
