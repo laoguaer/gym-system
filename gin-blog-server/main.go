@@ -1,13 +1,16 @@
 package main
 
 import (
+	"context"
 	"flag"
 	ginblog "gin-blog/internal"
+	"gin-blog/internal/EinoCompile"
 	g "gin-blog/internal/global"
 	"gin-blog/internal/middleware"
 	"gin-blog/internal/utils"
 	"strings"
 
+	"github.com/cloudwego/eino-ext/devops"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -22,6 +25,13 @@ func main() {
 	_ = ginblog.InitLogger(conf)
 	utils.DB = ginblog.InitDatabase(conf)
 	utils.RDB = ginblog.InitRedis(conf)
+	ctx := context.Background()
+	err := devops.Init(ctx)
+	if err != nil {
+		zap.L().Sugar().Errorf("[eino dev] init failed, err=%v", err)
+		return
+	}
+	EinoCompile.BuildMy(ctx)
 
 	// 初始化 gin 服务
 	gin.SetMode(conf.Server.Mode)

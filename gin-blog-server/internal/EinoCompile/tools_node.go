@@ -2,9 +2,6 @@ package EinoCompile
 
 import (
 	"context"
-	"gin-blog/internal/model"
-
-	utils2 "gin-blog/internal/utils"
 
 	"github.com/cloudwego/eino-ext/components/tool/duckduckgo"
 	"github.com/cloudwego/eino/components/tool"
@@ -29,17 +26,17 @@ type CourseToolConfig struct {
 type CourseAction string
 
 const (
-	GetCourse CourseAction = "getCourse"
+	GetCourse CourseAction = "getCourseInfo"
 )
 
 type CourseTaskRequest struct {
-	Action            CourseAction `json:"action" jsonschema:"description=action to perform, enum:getCourse"`
+	Action            CourseAction `json:"action" jsonschema:"description=action to perform, enum:getCourseInfo"`
 	CourseName        string       `json:"courseName" jsonschema:"description=课程名称"`
 	CourseDescription string       `json:"courseDescription" jsonschema:"description=模糊信息检索"`
 }
 type CourseTaskResponse struct {
-	Status     string           `json:"status" jsonschema:"description=status of the response"`
-	CouresList []model.CourseVO `json:"courseList" jsonschema:"description=查询到的课程列表"`
+	Status     string `json:"status" jsonschema:"description=status of the response"`
+	CouresList string `json:"courseList" jsonschema:"description=查询到的课程列表"`
 }
 
 func (t *CourseToolImpl) ToEinoTool() (tool tool.BaseTool, err error) {
@@ -48,15 +45,17 @@ func (t *CourseToolImpl) ToEinoTool() (tool tool.BaseTool, err error) {
 
 func (t *CourseToolImpl) Invoke(ctx context.Context, req *CourseTaskRequest) (resp *CourseTaskResponse, err error) {
 	resp = &CourseTaskResponse{}
-	switch req.Action {
-	case GetCourse:
-		resp.CouresList, _, err = model.GetCourseList(utils2.DB, 0, 100, req.CourseName, 0, 0, nil)
-		if err != nil {
-			resp.Status = "failed"
-			return nil, err
-		}
-		resp.Status = "success"
-	}
+	resp.Status = "success"
+	resp.CouresList = "ai体态课程-教练赵宇锋-结合3D动作捕捉技术实时分析体态数据，自动生成矫正训练方案，含肩颈平衡/骨盆矫正等12种评估维度"
+	// switch req.Action {
+	// case GetCourse:
+	// 	resp.CouresList, _, err = model.GetCourseList(utils2.DB, 0, 100, req.CourseName, 0, 0, nil)
+	// 	if err != nil {
+	// 		resp.Status = "failed"
+	// 		return nil, err
+	// 	}
+	// 	resp.Status = "success"
+	// }
 	return resp, nil
 }
 

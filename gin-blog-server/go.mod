@@ -6,6 +6,7 @@ toolchain go1.24.2
 
 require (
 	github.com/cloudwego/eino v0.3.27
+	github.com/cloudwego/eino-ext/devops v0.1.7
 	github.com/cloudwego/hertz v0.9.7
 	github.com/coze-dev/coze-go v0.0.0-20250123133019-5259c14934f1
 	github.com/gin-contrib/cors v1.4.0
@@ -62,6 +63,7 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/goph/emperror v0.17.2 // indirect
 	github.com/gorilla/context v1.1.1 // indirect
+	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/gorilla/sessions v1.2.1 // indirect
 	github.com/invopop/yaml v0.1.0 // indirect
@@ -69,6 +71,7 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.6 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/matoous/go-nanoid v1.5.1 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/nikolalohinski/gonja v1.5.3 // indirect
 	github.com/perimeterx/marshmallow v1.1.4 // indirect
