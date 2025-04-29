@@ -6,9 +6,9 @@ import { useUserStore } from '@/store'
 // 保持响应式, 否则可能 pinia 中还没拿到数据时, 这里显示无数据
 const userStore = useUserStore()
 
-function addToFavorites() {
-  window.$message?.info('按 CTRL + D 将本页加入书签')
-}
+// function addToFavorites() {
+//   window.$message?.info('按 CTRL + D 将本页加入书签')
+// }
 </script>
 
 <template>
@@ -23,32 +23,32 @@ function addToFavorites() {
       <p> {{ userStore.userInfo.intro }} </p>
     </div>
     <!-- 博客信息 -->
-    <div class="flex justify-center">
-      <RouterLink to="/archives" class="flex-1">
-        <p class="h-9 w-7/8 f-c-c transform rounded bg-blue-600 text-white transition-200 ease-in-out hover:scale-105 hover:bg-orange-600">
+    <div class="flex justify-center gap-x-4">
+      <RouterLink to="/myTrainer" class="flex-1">
+        <p class="h-9 w-10/10 f-c-c transform rounded bg-blue-600 text-white transition-200 ease-in-out hover:scale-105 hover:bg-orange-600">
           我的教练
         </p>
       </RouterLink>
-      <RouterLink to="/categories" class="flex-1">
-        <p class="h-9 w-7/8 f-c-c transform rounded bg-blue-600 text-white transition-200 ease-in-out hover:scale-105 hover:bg-orange-600">
+      <RouterLink to="/myCourses" class="flex-1">
+        <p class="h-9 w-1/1 f-c-c transform rounded bg-blue-600 text-white transition-200 ease-in-out hover:scale-105 hover:bg-orange-600">
           我的课程
         </p>
       </RouterLink>
-      <RouterLink to="/tags" class="flex-1">
-        <p class="h-9 w-7/8 f-c-c transform rounded bg-blue-600 text-white transition-200 ease-in-out hover:scale-105 hover:bg-orange-600">
+      <RouterLink to="/user" class="flex-1">
+        <p class="h-9 w-1/1 f-c-c transform rounded bg-blue-600 text-white transition-200 ease-in-out hover:scale-105 hover:bg-orange-600">
           个人信息
         </p>
       </RouterLink>
     </div>
     <!-- 收藏按钮 -->
-    <div class="flex justify-center text-center">
+    <!-- <div class="flex justify-center text-center">
       <button
         class="h-9 w-7/8 f-c-c transform rounded bg-blue-600 text-white transition-200 ease-in-out hover:scale-105 hover:bg-orange-600"
         @click="addToFavorites"
       >
         <span class="i-mdi:bookmark mr-1 text-xl" /> 加入书签
       </button>
-    </div>
+    </div> -->
     <!-- 社交信息 -->
     <div class="text-2xl space-x-4">
       <!-- QQ -->

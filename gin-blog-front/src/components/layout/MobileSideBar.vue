@@ -8,20 +8,21 @@ import UDrawer from '@/components/ui/UDrawer.vue'
 import { useAppStore, useUserStore } from '@/store'
 import api from '@/api'
 
-const { collapsed, blogConfig, articleCount, categoryCount, tagCount } = storeToRefs(useAppStore())
+const { collapsed, blogConfig } = storeToRefs(useAppStore())
 
 const [route, router] = [useRoute(), useRouter()]
 const [userStore, appStore] = [useUserStore(), useAppStore()]
 
 const menuOptions = [
   { text: '首页', icon: 'mdi:home', path: '/' },
-  { text: '归档', icon: 'mdi:archive', path: '/archives' },
-  { text: '分类', icon: 'mdi:menu', path: '/categories' },
-  { text: '标签', icon: 'mdi:tag', path: '/tags' },
-  { text: '相册', icon: 'mdi:view-gallery', path: '/albums' },
-  { text: '友链', icon: 'mdi:vector-link', path: '/links' },
   { text: '关于', icon: 'mdi:information-outline', path: '/about' },
-  { text: '留言', icon: 'mdi:forum', path: '/message' },
+  { text: '客户见证', icon: 'mdi:forum', path: '/message' },
+  { text: '教练团队', icon: 'mdi:account-group', path: '/trainerInfo' },
+  { text: '我的教练', icon: 'mdi:menu', path: '/myTrainer' },
+  { text: '课程信息预览', icon: 'mdi:view-gallery', path: '/courseInfo' },
+  { text: '我的课程', icon: 'mdi:menu', path: '/myCourses' },
+  { text: '健身文章', icon: 'mdi:view-list', path: '/teachingText' },
+  { text: '健身教学短片', icon: 'mdi:menu', path: '/teachingVideo' },
 ]
 
 async function logout() {
@@ -39,30 +40,6 @@ async function logout() {
       <div class="pt-4 text-center space-y-3">
         <div class="flex justify-center">
           <img :src="blogConfig.website_avatar" class="h-20 rounded-full" alt="作者头像">
-        </div>
-        <!-- 头像和介绍 -->
-        <div class="space-y-1">
-          <p class="text-lg">
-            {{ blogConfig.website_author }}
-          </p>
-          <p class="text-sm">
-            {{ blogConfig.website_intro }}
-          </p>
-        </div>
-        <!-- 博客信息 -->
-        <div class="flex justify-center text-sm">
-          <RouterLink to="/archives" class="flex-1" @click="appStore.setCollapsed(false)">
-            <p> 文章 </p>
-            <p> {{ articleCount }} </p>
-          </RouterLink>
-          <RouterLink to="/categories" class="flex-1" @click="appStore.setCollapsed(false)">
-            <p> 分类 </p>
-            <p> {{ categoryCount }} </p>
-          </RouterLink>
-          <RouterLink to="/tags" class="flex-1" @click="appStore.setCollapsed(false)">
-            <p> 标签 </p>
-            <p> {{ tagCount }} </p>
-          </RouterLink>
         </div>
       </div>
       <!-- 分隔线 -->

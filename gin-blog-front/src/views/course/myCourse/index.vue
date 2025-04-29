@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import ChatBot from '../../../components/layout/ChatBot.vue'
 import myCourse from './components/myCourse.vue'
 import { useAppStore, useUserStore } from '@/store'
 

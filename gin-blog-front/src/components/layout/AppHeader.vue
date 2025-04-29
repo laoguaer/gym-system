@@ -164,7 +164,7 @@ async function logout() {
 <style scoped lang="scss">
 .nav {
   transition: all 0.8s;
-  color: #fff;
+  color: #000;
   background: rgba(0, 0, 0, 0) !important;
 }
 

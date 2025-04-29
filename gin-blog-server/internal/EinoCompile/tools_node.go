@@ -39,9 +39,9 @@ const (
 
 type CourseTaskRequest struct {
 	Action     CourseAction `json:"action" jsonschema:"description=需要执行的动作，支持：查询"`
-	CourseName string      `json:"courseName" jsonschema:"description=课程名称，没有提到则为空"`
-	IsSingle   string      `json:"isSingle" jsonschema:"description=是否是私教课，没有提到则为空，如果是私教课，则为true，如果是团课，则为false"`
-	CoachName  string      `json:"coachName" jsonschema:"description=教练名称，没有提到则为空，如果是赵教练，则为赵"`
+	CourseName string       `json:"courseName" jsonschema:"description=课程名称，没有提到则为空"`
+	IsSingle   string       `json:"isSingle" jsonschema:"description=是否是私教课，没有提到则为空，如果是私教课，则为true，如果是团课，则为false"`
+	CoachName  string       `json:"coachName" jsonschema:"description=教练名称，没有提到则为空，如果是赵教练，则为赵"`
 }
 type CourseTaskResponse struct {
 	Status     string            `json:"status" jsonschema:"description=status of the response"`
@@ -166,7 +166,7 @@ const (
 type ReservationToolRequest struct {
 	Action   ReservationAction `json:"action" jsonschema:"description=需要执行的动作，支持：查询、创建、更新、删除"`
 	UserID   int               `json:"userId" jsonschema:"description=用户ID，没有提到则为0"`
-	CourseID int               `json:"courseId" jsonschema:"description=课程ID，没有提到则为0"`
+	CourseID int               `json:"courseId" jsonschema:"description=课程ID，如果提到了课程名，则调用courseTool查询课程ID，没有提到则为0"`
 	BuyCnt   int               `json:"buyCnt" jsonschema:"description=购买次数，没有提到则为0"`
 	ID       int               `json:"id" jsonschema:"description=预约ID，没有提到则为0"`
 }

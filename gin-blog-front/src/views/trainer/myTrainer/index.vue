@@ -35,7 +35,7 @@ function goToLogin() {
 <template>
   <div class="mx-auto px-4 py-6 container">
     <template v-if="userStore.userId">
-      <ChatBot />
+      <!-- <ChatBot /> -->
       <MyTrainer />
     </template>
     <template v-else>

@@ -55,11 +55,11 @@ function filterMdSymbol(md) {
     <div v-if="userStore.userId" class="absolute right-5 top-40 z-10">
       <UserInfo />
     </div>
-    <!-- 聊天机器人 - 现在是全局浮动组件 -->
-    <ChatBot v-if="userStore.userId" />
+    <!-- 聊天机器人 - 现在是全局浮动组件
+    <ChatBot v-if="userStore.userId" /> -->
   </div>
   <!-- 内容 -->
-  <div class="mx-auto h-[calc(100vh)] max-w-[1400px] flex flex-col justify-center px-3" style="margin-top: calc(100vh)">
+  <div class="min-h-[100vh] flex flex-col px-4 py-4" style="margin-top: calc(100vh)">
     <TrainerOverview />
   </div>
   <AppFooter />

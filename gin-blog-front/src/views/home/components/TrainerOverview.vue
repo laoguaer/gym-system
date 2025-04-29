@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
+import { RouterLink } from 'vue-router'
 
 // 假设将来会有一个教练相关的store
 // import { useTrainerStore } from '@/store'
@@ -107,9 +108,9 @@ onMounted(async () => {
           </p>
         </div>
         <div>
-          <button class="border border-gray-300 rounded-lg px-6 py-3 transition duration-300 hover:bg-gray-100 hover:shadow-md">
+          <RouterLink to="/trainerInfo" class="inline-block border border-gray-300 rounded-lg px-6 py-3 transition duration-300 hover:scale-105 hover:bg-gray-100 hover:shadow-md">
             Know More →
-          </button>
+          </RouterLink>
         </div>
       </div>
 

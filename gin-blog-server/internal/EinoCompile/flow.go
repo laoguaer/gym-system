@@ -19,10 +19,10 @@ func newLambda1(ctx context.Context) (lba *compose.Lambda, err error) {
 		return nil, err
 	}
 	config.Model = chatModelIns11
-	toolIns21, err := newTool(ctx)
-	if err != nil {
-		return nil, err
-	}
+	// toolIns21, err := newTool(ctx)
+	// if err != nil {
+	// 	return nil, err
+	// }
 	courseTool, err := newCourseTool()
 	if err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func newLambda1(ctx context.Context) (lba *compose.Lambda, err error) {
 		return nil, err
 	}
 
-	config.ToolsConfig.Tools = []tool.BaseTool{toolIns21, courseTool, coachTool, reservationTool, bookingTool}
+	config.ToolsConfig.Tools = []tool.BaseTool{courseTool, coachTool, reservationTool, bookingTool}
 	ins, err := react.NewAgent(ctx, config)
 	if err != nil {
 		return nil, err

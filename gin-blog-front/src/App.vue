@@ -5,7 +5,7 @@ import UToast from '@/components/ui/UToast.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import GlobalModal from '@/components/modal/index.vue'
 import BackToTop from '@/components/BackTop.vue'
-
+import ChatBot from '@/components/layout/ChatBot.vue'
 import { useAppStore, useUserStore } from '@/store'
 
 const appStore = useAppStore()
@@ -46,6 +46,9 @@ onMounted(() => {
       </RouterView>
     </article>
   </div>
+  <template v-if="userStore.userId">
+    <ChatBot />
+  </template>
   <!-- 回到顶部 -->
   <BackToTop />
   <!-- 全局弹窗 -->

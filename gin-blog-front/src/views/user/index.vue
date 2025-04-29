@@ -52,7 +52,6 @@ async function updateUserInfo() {
           <div
             v-for="item of [
               { label: '昵称', key: 'nickname' },
-              { label: '个人网站', key: 'website' },
               { label: '简介', key: 'intro' },
               { label: '邮箱', key: 'email' },
             ]" :key="item.label"

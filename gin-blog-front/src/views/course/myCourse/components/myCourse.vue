@@ -106,7 +106,7 @@ onMounted(async () => {
       :course="selectedCourse"
       @booking-success="refreshData"
     />
-    <h1 class="mb-6 text-2xl text-gray-800 font-bold">
+    <h1 class="mb-6 mt-10 text-2xl text-gray-800 font-bold">
       我的课程
     </h1>
 

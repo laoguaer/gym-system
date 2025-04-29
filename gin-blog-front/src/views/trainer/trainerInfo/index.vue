@@ -6,15 +6,15 @@ import TrainerInfo from './components/tainnerInfo.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import { useUserStore } from '@/store'
 
-const userStore = useUserStore()
+// const userStore = useUserStore()
 </script>
 
 <template>
   <div class="min-h-[100vh] flex flex-col px-4 py-4">
     <TrainerInfo />
-    <template v-if="userStore.userId">
+    <!-- <template v-if="userStore.userId">
       <ChatBot />
-    </template>
+    </template> -->
   </div>
 
   <AppFooter />

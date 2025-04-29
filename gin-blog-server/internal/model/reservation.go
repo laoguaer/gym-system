@@ -27,6 +27,9 @@ func GetReservationByUserId(db *gorm.DB, userID int) ([]Reservation, error) {
 func GetReservationByUserIdAndCourseId(db *gorm.DB, userID int, courseID int) (*Reservation, error) {
 	var reservation Reservation
 	if err := db.Where("user_id =? AND course_id =?", userID, courseID).First(&reservation).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &reservation, nil
