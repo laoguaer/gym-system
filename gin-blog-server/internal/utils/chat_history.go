@@ -39,7 +39,7 @@ func SaveUserMessage(ctx context.Context, rdb *redis.Client, userId string, mess
 	}
 
 	// 设置过期时间
-	rdb.Expire(ctx, key, HistoryExpiration)
+	// rdb.Expire(ctx, key, HistoryExpiration)
 
 	// 保持列表长度不超过最大值
 	current, err := rdb.LLen(ctx, key).Result()
@@ -68,7 +68,7 @@ func SaveAIMessage(ctx context.Context, rdb *redis.Client, userId string, messag
 	}
 
 	// 设置过期时间
-	rdb.Expire(ctx, key, HistoryExpiration)
+	// rdb.Expire(ctx, key, HistoryExpiration)
 
 	// 保持列表长度不超过最大值
 	current, err := rdb.LLen(ctx, key).Result()
@@ -81,11 +81,16 @@ func SaveAIMessage(ctx context.Context, rdb *redis.Client, userId string, messag
 }
 
 // 获取用户的聊天历史记录
-func GetChatHistory(ctx context.Context, rdb *redis.Client, userId string) ([]*schema.Message, error) {
+func GetChatHistory(ctx context.Context, rdb *redis.Client, userId string, size int) ([]*schema.Message, error) {
+	// 参数校验
+	if size <= 0 {
+		return nil, fmt.Errorf("invalid size: must be positive integer")
+	}
+
 	key := ChatHistoryKey + userId
 
-	// 从Redis获取历史记录
-	msgs, err := rdb.LRange(ctx, key, 0, -1).Result()
+	// 从Redis获取最近size条记录（-size到-1表示最后N个元素）
+	msgs, err := rdb.LRange(ctx, key, int64(-size), -1).Result()
 	if err != nil {
 		return nil, fmt.Errorf("从Redis获取历史记录失败: %w", err)
 	}
@@ -95,13 +100,12 @@ func GetChatHistory(ctx context.Context, rdb *redis.Client, userId string) ([]*s
 		return []*schema.Message{}, nil
 	}
 
-	// 反序列化消息
+	// 反序列化消息（代码保持不变）
 	history := make([]*schema.Message, 0, len(msgs))
 	for _, msgStr := range msgs {
 		var msg schema.Message
 		err := json.Unmarshal([]byte(msgStr), &msg)
 		if err != nil {
-			// 记录错误但继续处理其他消息
 			fmt.Printf("反序列化消息失败: %v\n", err)
 			continue
 		}

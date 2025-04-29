@@ -154,7 +154,7 @@ func (*Chat) GetHistory(c *gin.Context) {
 
 	// 从Redis获取历史会话
 	redisCli := utils.RDB
-	history, err := utils.GetChatHistory(c, redisCli, id)
+	history, err := utils.GetChatHistory(c, redisCli, id, 10)
 	if err != nil {
 		log.Printf("[Chat] Error getting chat history: %v\n", err)
 		c.JSON(consts.StatusInternalServerError, map[string]string{
@@ -198,7 +198,7 @@ func RunAgent(ctx context.Context, id string, msg string) (*schema.StreamReader[
 	redisCli := utils.RDB
 
 	// 从Redis获取历史会话
-	history, err := utils.GetChatHistory(ctx, redisCli, id)
+	history, err := utils.GetChatHistory(ctx, redisCli, id, 4)
 	if err != nil {
 		log.Printf("[Chat] 获取历史会话失败: %v，将使用空历史记录", err)
 		history = []*schema.Message{}
