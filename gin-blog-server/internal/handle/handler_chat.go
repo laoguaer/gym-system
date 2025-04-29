@@ -2,6 +2,7 @@ package handle
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"gin-blog/internal/EinoCompile"
@@ -81,6 +82,9 @@ func (*Chat) Send(c *gin.Context) {
 	c.Writer.Flush()
 
 	// 处理消息流
+	// 用于跟踪token使用情况
+	tokenCount := 0
+
 outer:
 	for {
 		select {
@@ -97,6 +101,15 @@ outer:
 					Data:  "聊天完成",
 				})
 				c.Writer.Flush()
+
+				// 发送token使用信息
+				tokenInfo := map[string]int{"token_count": tokenCount}
+				tokenData, _ := json.Marshal(tokenInfo)
+				_ = sse.Encode(c.Writer, sse.Event{
+					Event: "token_info",
+					Data:  string(tokenData),
+				})
+				c.Writer.Flush()
 				break outer
 			}
 			if err != nil {
@@ -109,6 +122,9 @@ outer:
 				c.Writer.Flush()
 				break outer
 			}
+
+			// 估算token数量（简单实现，每个字符算作1个token）
+			tokenCount += len(msg.Content)
 
 			// 发送消息内容
 			err = sse.Encode(c.Writer, sse.Event{

@@ -10,7 +10,9 @@ import (
 	"gin-blog/internal/utils"
 	"strings"
 
+	"github.com/cloudwego/eino-ext/callbacks/langfuse"
 	"github.com/cloudwego/eino-ext/devops"
+	"github.com/cloudwego/eino/callbacks"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -32,6 +34,16 @@ func main() {
 		return
 	}
 	EinoCompile.BuildMy(ctx)
+	PublicKey := ""
+	SecretKey := ""
+	cbh, flusher := langfuse.NewLangfuseHandler(&langfuse.Config{
+		Host:      "https://cloud.langfuse.com",
+		PublicKey: PublicKey,
+		SecretKey: SecretKey,
+	})
+	defer flusher() // 等待所有trace上报完成后退出
+
+	callbacks.AppendGlobalHandlers(cbh) // 设置langfuse为全局callback
 
 	// 初始化 gin 服务
 	gin.SetMode(conf.Server.Mode)

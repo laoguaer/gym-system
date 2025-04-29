@@ -173,3 +173,46 @@ func GetCoursesByCoachId(db *gorm.DB, coachID int) ([]Course, error) {
 	return courses, result.Error
 }
 
+// GetCourseList 获取课程列表
+func GetCourseListForAi(db *gorm.DB, title *string, coachIdList []int, isSingle *bool) (list []CourseVO, err error) {
+	// 构建基础查询
+	query := db.Model(&Course{})
+
+	var courses []Course
+
+	// 应用过滤条件
+	if title != nil && *title != "" && *title != "nil" {
+		query = query.Where("title LIKE?", "%"+*title+"%")
+	}
+	if len(coachIdList) > 0 {
+		query = query.Where("coach_id IN ?", coachIdList)
+	}
+	if isSingle != nil {
+		query = query.Where("is_single =?", *isSingle)
+	}
+	// 获取数据
+	err = query.Find(&courses).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// 转换为VO对象
+	list = make([]CourseVO, len(courses))
+	for i, course := range courses {
+		list[i] = CourseVO{
+			ID:          course.ID,
+			Title:       course.Title,
+			Description: course.Description,
+			Tags:        course.Tags,
+			StartTime:   course.StartTime,
+			EndTime:     course.EndTime,
+			CoachID:     course.CoachID,
+			MaxCapacity: course.MaxCapacity,
+			IsSingle:    course.IsSingle, // 将uint8转换为bool
+		}
+
+		// 如果需要，可以在这里加载教练信息和标签列表
+	}
+
+	return list, nil
+}
