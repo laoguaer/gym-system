@@ -7,6 +7,7 @@ import (
 	"gin-blog/internal/EinoCompile"
 	g "gin-blog/internal/global"
 	"gin-blog/internal/middleware"
+	"gin-blog/internal/model"
 	"gin-blog/internal/utils"
 	"strings"
 
@@ -34,10 +35,15 @@ func main() {
 		return
 	}
 	EinoCompile.BuildMy(ctx)
-	PublicKey := ""
-	SecretKey := ""
+	configMap, err := model.GetConfigMap(utils.DB)
+	if err != nil {
+		zap.L().Error("获取配置失败", zap.Error(err))
+		return
+	}
+	PublicKey := configMap["Public_Key"]
+	SecretKey := configMap["Secret_Key"]
 	cbh, flusher := langfuse.NewLangfuseHandler(&langfuse.Config{
-		Host:      "https://cloud.langfuse.com",
+		Host:      "https://us.cloud.langfuse.com",
 		PublicKey: PublicKey,
 		SecretKey: SecretKey,
 	})
