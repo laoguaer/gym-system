@@ -61,3 +61,12 @@ func GetCoachIdListByName(db *gorm.DB, name string) ([]int, error) {
 	err := db.Model(&Coach{}).Select("id").Where("name LIKE?", "%"+name+"%").Find(&res).Error
 	return res, err
 }
+
+func GetCoachForAi(db *gorm.DB, coachName string) ([]Coach, error) {
+	if coachName == "" {
+		return nil, nil
+	}
+	var res []Coach
+	err := db.Model(&Coach{}).Select("name, desc, occupation").Where("name LIKE?", "%"+coachName+"%").Find(&res).Error
+	return res, err
+}

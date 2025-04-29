@@ -198,7 +198,7 @@ func RunAgent(ctx context.Context, id string, msg string) (*schema.StreamReader[
 	redisCli := utils.RDB
 
 	// 从Redis获取历史会话
-	history, err := utils.GetChatHistory(ctx, redisCli, id, 4)
+	history, err := utils.GetChatHistory(ctx, redisCli, id, 0)
 	if err != nil {
 		log.Printf("[Chat] 获取历史会话失败: %v，将使用空历史记录", err)
 		history = []*schema.Message{}
@@ -212,7 +212,7 @@ func RunAgent(ctx context.Context, id string, msg string) (*schema.StreamReader[
 
 	userMessage := &EinoCompile.UserMessage{
 		ID:      id,
-		Query:   msg,
+		Query:   fmt.Sprintf("[userId:%s]%s", id, msg),
 		History: history,
 	}
 

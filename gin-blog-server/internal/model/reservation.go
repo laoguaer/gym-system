@@ -91,6 +91,28 @@ func GetBookingByUserId(db *gorm.DB, userID int) ([]Booking, error) {
 	return bookings, nil
 }
 
+func GetBookingForAi(db *gorm.DB, userID int, status int) ([]Booking, error) {
+	var bookings []Booking
+	if status != 3 {
+		if err := db.Where("user_id =? AND status =?", userID, status).Order("start_time desc").Find(&bookings).Error; err != nil {
+			return nil, err
+		}
+	} else {
+		if err := db.Where("user_id =?", userID).Order("start_time desc").Find(&bookings).Error; err != nil {
+			return nil, err
+		}
+	}
+	return bookings, nil
+}
+
+func GetBookingByUserIdAndCourseId(db *gorm.DB, usrId int, courseID int) ([]Booking, error) {
+	var booking []Booking
+	if err := db.Where("user_id =? AND course_id =?", usrId, courseID).Find(&booking).Error; err != nil {
+		return nil, err
+	}
+	return booking, nil
+}
+
 func GetBookingByUserIdAndTime(db *gorm.DB, userID int, dayTime time.Time) ([]Booking, error) {
 	var bookings []Booking
 	if err := db.Debug().Where("user_id =? AND DATE(start_time) = DATE(?)", userID, dayTime).Order("start_time").Find(&bookings).Error; err != nil {

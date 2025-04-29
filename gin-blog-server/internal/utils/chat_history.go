@@ -83,7 +83,10 @@ func SaveAIMessage(ctx context.Context, rdb *redis.Client, userId string, messag
 // 获取用户的聊天历史记录
 func GetChatHistory(ctx context.Context, rdb *redis.Client, userId string, size int) ([]*schema.Message, error) {
 	// 参数校验
-	if size <= 0 {
+	if size == 0 {
+		return nil, nil
+	}
+	if size < 0 {
 		return nil, fmt.Errorf("invalid size: must be positive integer")
 	}
 

@@ -27,7 +27,20 @@ func newLambda1(ctx context.Context) (lba *compose.Lambda, err error) {
 	if err != nil {
 		return nil, err
 	}
-	config.ToolsConfig.Tools = []tool.BaseTool{toolIns21, courseTool}
+	coachTool, err := newCoachTool()
+	if err != nil {
+		return nil, err
+	}
+	reservationTool, err := newReservationTool()
+	if err != nil {
+		return nil, err
+	}
+	bookingTool, err := newBookingTool()
+	if err != nil {
+		return nil, err
+	}
+
+	config.ToolsConfig.Tools = []tool.BaseTool{toolIns21, courseTool, coachTool, reservationTool, bookingTool}
 	ins, err := react.NewAgent(ctx, config)
 	if err != nil {
 		return nil, err

@@ -7,12 +7,12 @@ import InfiniteLoading from 'v3-infinite-loading'
 // Markdown => Html
 import { marked } from 'marked'
 
+import ChatBot from '../../components/layout/ChatBot.vue'
 import AuthorInfo from './components/AuthorInfo.vue'
 import UserInfo from './components/UserInfo.vue'
 import WebsiteInfo from './components/WebsiteInfo.vue'
 import HomeBanner from './components/HomeBanner.vue'
 import Announcement from './components/Announcement.vue'
-import ChatBot from './components/ChatBot.vue'
 import TrainerOverview from './components/TrainerOverview.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 
@@ -55,10 +55,8 @@ function filterMdSymbol(md) {
     <div v-if="userStore.userId" class="absolute right-5 top-40 z-10">
       <UserInfo />
     </div>
-    <!-- 聊天机器人 -->
-    <div v-if="userStore.userId" class="absolute left-5 top-80 z-10 w-80 -translate-y-1/2">
-      <ChatBot />
-    </div>
+    <!-- 聊天机器人 - 现在是全局浮动组件 -->
+    <ChatBot v-if="userStore.userId" />
   </div>
   <!-- 内容 -->
   <div class="mx-auto h-[calc(100vh)] max-w-[1400px] flex flex-col justify-center px-3" style="margin-top: calc(100vh)">

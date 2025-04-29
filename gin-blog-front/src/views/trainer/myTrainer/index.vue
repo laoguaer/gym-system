@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import ChatBot from '../../../components/layout/ChatBot.vue'
 import MyTrainer from './components/mytrainer.vue'
 import { useAppStore, useUserStore } from '@/store'
 
@@ -34,6 +35,7 @@ function goToLogin() {
 <template>
   <div class="mx-auto px-4 py-6 container">
     <template v-if="userStore.userId">
+      <ChatBot />
       <MyTrainer />
     </template>
     <template v-else>

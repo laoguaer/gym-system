@@ -3,6 +3,8 @@ import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import api from '@/api'
 import { useAppStore, useUserStore } from '@/store'
 
+const isExpanded = ref(false) // 控制聊天窗口是否展开
+
 const messages = ref([])
 const userInput = ref('')
 const isSending = ref(false) // 用于跟踪是否正在发送消息
@@ -177,44 +179,136 @@ function scrollToBottom() {
 </script>
 
 <template>
-  <div class="chat-bot card-view animate-zoom-in animate-duration-600 lg:block space-y-2">
-    <h2 class="chat-title">
-      <i class="chat-icon">💬</i> AI管家
-    </h2>
-    <div class="messages">
-      <div v-for="(message, index) in messages" :key="index" class="message" :class="[message.type]">
-        <div v-if="message.type === 'system'" class="message-content" v-html="message.text" />
-        <div v-else class="message-content">
-          {{ message.text }}
+  <div class="chat-container" :class="{ expanded: isExpanded }">
+    <!-- 聊天按钮 -->
+    <div class="chat-button" @click="isExpanded = !isExpanded">
+      <i class="chat-icon">{{ isExpanded ? '✕' : '💬' }}</i>
+    </div>
+
+    <!-- 聊天窗口 -->
+    <div v-if="isExpanded" class="chat-bot card-view space-y-2" :class="{ 'chat-expanded': isExpanded }">
+      <h2 class="chat-title">
+        <i class="chat-icon">💬</i> AI管家
+      </h2>
+      <div class="messages">
+        <div v-for="(message, index) in messages" :key="index" class="message" :class="[message.type]">
+          <div v-if="message.type === 'system'" class="message-content" v-html="message.text" />
+          <div v-else class="message-content">
+            {{ message.text }}
+          </div>
+        </div>
+        <div v-if="isSending" class="typing-indicator">
+          <span />
+          <span />
+          <span />
         </div>
       </div>
-      <div v-if="isSending" class="typing-indicator">
-        <span />
-        <span />
-        <span />
+      <div class="input-container">
+        <input
+          ref="inputRef"
+          v-model="userInput"
+          class="input-field"
+          placeholder="输入消息..."
+          @keyup.enter="sendMessage"
+        >
+        <button class="send-button" :disabled="isSending || !userInput.trim()" @click="sendMessage">
+          <i class="send-icon">➤</i>
+        </button>
       </div>
-    </div>
-    <div class="input-container">
-      <input
-        ref="inputRef"
-        v-model="userInput"
-        class="input-field"
-        placeholder="输入消息..."
-        @keyup.enter="sendMessage"
-      >
-      <button class="send-button" :disabled="isSending || !userInput.trim()" @click="sendMessage">
-        <i class="send-icon">➤</i>
-      </button>
     </div>
   </div>
 </template>
 
 <style scoped>
+.chat-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  transition: all 0.3s ease;
+  max-width: 100%;
+}
+
+.chat-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  transition: all 0.3s ease;
+  z-index: 1001;
+}
+
+.chat-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+}
+
+.chat-button .chat-icon {
+  font-size: 1.8rem;
+  color: white;
+  margin: 0;
+}
+
+.expanded .chat-button {
+  position: absolute;
+  top: -30px;
+  right: 0;
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.expanded .chat-button .chat-icon:before {
+  content: '✕';
+  font-size: 1.5rem;
+}
+
+.chat-expanded {
+  animation: expandChat 0.3s ease forwards;
+  display: block;
+}
+
+@keyframes expandChat {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* 移动设备适配 */
+@media (max-width: 768px) {
+  .chat-bot {
+    width: 300px;
+    max-height: 450px;
+  }
+
+  .chat-container {
+    bottom: 15px;
+    right: 15px;
+  }
+
+  .chat-button {
+    width: 50px;
+    height: 50px;
+  }
+
+  .messages {
+    max-height: 280px;
+  }
+}
+
 .chat-bot {
   border: none;
   padding: 18px;
-  max-width: 600px;
-  margin: 0 auto;
+  width: 350px;
+  max-height: 500px;
+  margin-top: 10px;
   overflow: hidden;
   background-color: #ffffff;
   border-radius: 16px;

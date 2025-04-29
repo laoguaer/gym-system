@@ -28,8 +28,8 @@ type CoachVO struct {
 
 // CoachQuery 教练查询参数
 type CoachQuery struct {
-	Page int    `form:"page_num" binding:"required,min=1"`
-	Size int    `form:"page_size" binding:"required,min=1,max=50"`
+	Page int    `form:"page" binding:"required,min=1"`
+	Size int    `form:"size" binding:"required,min=1,max=50"`
 	Name string `form:"name"`
 }
 

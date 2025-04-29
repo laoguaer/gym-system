@@ -174,15 +174,15 @@ func GetCoursesByCoachId(db *gorm.DB, coachID int) ([]Course, error) {
 }
 
 // GetCourseList 获取课程列表
-func GetCourseListForAi(db *gorm.DB, title *string, coachIdList []int, isSingle *bool) (list []CourseVO, err error) {
+func GetCourseListForAi(db *gorm.DB, title string, coachIdList []int, isSingle *bool) (list []CourseVO, err error) {
 	// 构建基础查询
 	query := db.Model(&Course{})
 
 	var courses []Course
 
 	// 应用过滤条件
-	if title != nil && *title != "" && *title != "nil" {
-		query = query.Where("title LIKE?", "%"+*title+"%")
+	if title != "" {
+		query = query.Where("title LIKE?", "%"+title+"%")
 	}
 	if len(coachIdList) > 0 {
 		query = query.Where("coach_id IN ?", coachIdList)
