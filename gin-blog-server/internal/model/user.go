@@ -50,7 +50,7 @@ func GetUserList(db *gorm.DB, page, size int, loginType int8, nickname, username
 		db = db.Where("username LIKE ?", "%"+username+"%")
 	}
 
-	result := db.Model(&UserAuth{}).
+	result := db.Debug().Model(&UserAuth{}).
 		Joins("LEFT JOIN user_info ON user_info.id = user_auth.user_info_id").
 		Where("user_info.nickname LIKE ?", "%"+nickname+"%").
 		Preload("UserInfo").

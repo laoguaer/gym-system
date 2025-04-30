@@ -27,7 +27,7 @@ const searchForm = ref({
   is_single: null,
   tag_ids: [],
   page: 1,
-  page_size: 8,
+  size: 8,
 })
 
 // 单人/团体课程选项
@@ -45,7 +45,7 @@ const currentPage = computed({
     fetchCourses()
   },
 })
-const totalPages = computed(() => Math.ceil(courseCount.value / searchForm.value.page_size))
+const totalPages = computed(() => Math.ceil(courseCount.value / searchForm.value.size))
 
 // 格式化日期时间
 function formatDateTime(dateTimeStr) {
@@ -66,7 +66,7 @@ function resetSearch() {
     is_single: null,
     tag_ids: [],
     page: 1,
-    page_size: 8,
+    size: 8,
   }
   fetchCourses()
 }

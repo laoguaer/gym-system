@@ -16,8 +16,8 @@ type Booking struct{}
 
 // BookingQuery 预约查询参数
 type BookingQuery struct {
-	Page     int    `form:"page_num"`  // 当前页数（从1开始）
-	Size     int    `form:"page_size"` // 每页条数
+	Page     int    `form:"page"`  // 当前页数（从1开始）
+	Size     int    `form:"size"` // 每页条数
 	UserID   int    `form:"user_id"`
 	CourseID int    `form:"course_id"`
 	Status   int    `form:"status"`

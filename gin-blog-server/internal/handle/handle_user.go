@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type User struct{}
@@ -117,7 +118,7 @@ func (*User) GetList(c *gin.Context) {
 		ReturnError(c, g.ErrRequest, err)
 		return
 	}
-
+	zap.L().Sugar().Debugf("alenzhao query: %v", query)
 	list, count, err := model.GetUserList(GetDB(c), query.Page, query.Size, query.LoginType, query.Nickname, query.Username)
 	if err != nil {
 		ReturnError(c, g.ErrDbOp, err)
