@@ -57,7 +57,7 @@ onMounted(async () => {
     // 获取教练选项 - 使用page和page_size参数，与CrudTable组件保持一致
     const coachResp = await api.getCoaches({ page: 1, size: 10 })
     if (coachResp && coachResp.data) {
-      coachOptions.value = coachResp.data.list.map(coach => ({
+      coachOptions.value = coachResp.data.page_data.map(coach => ({
         label: coach.name,
         value: coach.id,
       }))
@@ -126,11 +126,11 @@ const columns = [
   },
   {
     title: '教练',
-    key: 'coach_id',
+    key: 'coach_name',
     width: 80,
     align: 'center',
     render(row) {
-      return h('span', row.coach?.name || '未分配')
+      return h('span', row.coach_name)
     },
   },
   {

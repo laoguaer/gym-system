@@ -15,6 +15,7 @@ type Course struct {
 	StartTime   time.Time `json:"start_time" gorm:"not null"`
 	EndTime     time.Time `json:"end_time" gorm:"not null"`
 	CoachID     int       `json:"coach_id" gorm:"not null"`
+	CoachName   string    `json:"coach_namegorm:type:varchar(255);not null"`
 	MaxCapacity int       `json:"max_capacity" gorm:"not null;default:30"`
 	IsSingle    int       `json:"is_single" gorm:"type:bit(1);not null"`
 
@@ -41,10 +42,11 @@ type CourseVO struct {
 	StartTime   time.Time `json:"start_time"`
 	EndTime     time.Time `json:"end_time"`
 	CoachID     int       `json:"coach_id"`
-	MaxCapacity int       `json:"max_capacity"`
-	IsSingle    int       `json:"is_single"`
-	Coach       *Coach    `json:"coach,omitempty"`
-	TagList     []string  `json:"tag_list,omitempty"`
+	CoachName   string   `json:"coach_name"`
+	MaxCapacity int      `json:"max_capacity"`
+	IsSingle    int      `json:"is_single"`
+	Coach       *Coach   `json:"coach,omitempty"`
+	TagList     []string `json:"tag_list,omitempty"`
 }
 
 // GetCourseList 获取课程列表
@@ -93,7 +95,7 @@ func GetCourseList(db *gorm.DB, page, size int, title string, coachID int, tagID
 			Tags:        course.Tags,
 			StartTime:   course.StartTime,
 			EndTime:     course.EndTime,
-			CoachID:     course.CoachID,
+			CoachName:   course.CoachName,
 			MaxCapacity: course.MaxCapacity,
 			IsSingle:    course.IsSingle, // 将uint8转换为bool
 		}
@@ -120,7 +122,7 @@ func GetCourseById(db *gorm.DB, id int) (*CourseVO, error) {
 		Tags:        course.Tags,
 		StartTime:   course.StartTime,
 		EndTime:     course.EndTime,
-		CoachID:     course.CoachID,
+		CoachName:   course.CoachName,
 		MaxCapacity: course.MaxCapacity,
 		IsSingle:    course.IsSingle, // 将uint8转换为bool
 	}
@@ -206,7 +208,7 @@ func GetCourseListForAi(db *gorm.DB, title string, coachIdList []int, isSingle *
 			Tags:        course.Tags,
 			StartTime:   course.StartTime,
 			EndTime:     course.EndTime,
-			CoachID:     course.CoachID,
+			CoachName:   course.CoachName,
 			MaxCapacity: course.MaxCapacity,
 			IsSingle:    course.IsSingle, // 将uint8转换为bool
 		}

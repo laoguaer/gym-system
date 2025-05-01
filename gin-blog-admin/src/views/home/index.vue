@@ -13,6 +13,10 @@ const homeInfo = ref({
   user_count: 0,
   article_count: 0,
   message_count: 0,
+  course_count: 0,
+  booking_count: 0,
+  coach_count: 0,
+  video_count: 0,
 })
 
 onMounted(async () => {
@@ -70,11 +74,11 @@ async function getOneSentence() {
             { icon: 'i-fa6-solid:users', color: 'text-[#40C9C6]', label: '访问量', key: 'view_count' },
             { icon: 'i-material-symbols:article', color: 'text-[#F4516C]', label: '教学文章数量', key: 'article_count' },
             { icon: 'i-bxs:comment-dots', color: 'text-[#36A3F7]', label: '留言量', key: 'message_count' },
-            { icon: '', color: '', label: '课程数量', key: '' },
-            { icon: '', color: '', label: '预约数量', key: '' },
-            { icon: '', color: '', label: '教练数量', key: '' },
-            { icon: '', color: '', label: '会员数量', key: '' },
-            { icon: '', color: '', label: '教学视频数量', key: '' },
+            { icon: 'i-mdi:book-education', color: 'text-[#34BFA3]', label: '课程数量', key: 'course_count' },
+            { icon: 'i-mdi:calendar-check', color: 'text-[#FFB64D]', label: '预约数量', key: 'booking_count' },
+            { icon: 'i-mdi:whistle', color: 'text-[#975FE4]', label: '教练数量', key: 'coach_count' },
+            { icon: 'i-mdi:account-group', color: 'text-[#FF9F7F]', label: '会员数量', key: 'user_count' },
+            { icon: 'i-mdi:video-box', color: 'text-[#37A2DA]', label: '教学视频数量', key: 'video_count' },
           ]" :key="item.key"
         >
           <NGi>

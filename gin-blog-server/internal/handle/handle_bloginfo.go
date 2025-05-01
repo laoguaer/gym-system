@@ -19,10 +19,10 @@ type BlogHomeVO struct {
 	UserCount    int `json:"user_count"`    // 用户数量
 	MessageCount int `json:"message_count"` // 留言数量
 	ViewCount    int `json:"view_count"`    // 访问量
-	// CategoryCount int64 `json:"category_count"` // 分类数量
-	// TagCount      int64 `json:"tag_count"`      // 标签数量
-	// BlogConfig    model.BlogConfigDetail `json:"blog_config"`    // 博客信息
-	// PageList      []Page                 `json:"pageList"`
+	CoachCount   int `json:"coach_count"`   // 教练数量
+	VideoCount   int `json:"video_count"`   // 视频数量
+	BookingCount int `json:"booking_count"` // 预约数量
+	CourseCount  int `json:"course_count"`  // 课程数量
 }
 
 type AboutReq struct {
@@ -114,12 +114,36 @@ func (*BlogInfo) GetHomeInfo(c *gin.Context) {
 		ReturnError(c, g.ErrRedisOp, err)
 		return
 	}
+	bookingCount, err := model.Count(db, &model.Booking{})
+	if err != nil {
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
+	courseCount, err := model.Count(db, &model.Course{})
+	if err != nil {
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
+	coachCount, err := model.Count(db, &model.Coach{})
+	if err != nil {
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
+	VideoCount, err := model.Count(db, &model.Video{})
+	if err != nil {
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
 
 	ReturnSuccess(c, BlogHomeVO{
 		ArticleCount: articleCount,
 		UserCount:    userCount,
 		MessageCount: messageCount,
 		ViewCount:    viewCount,
+		CoachCount:   coachCount,
+		VideoCount:   VideoCount,
+		BookingCount: bookingCount,
+		CourseCount:  courseCount,
 	})
 }
 

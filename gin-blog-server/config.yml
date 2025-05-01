@@ -7,7 +7,7 @@ Server:
 JWT:
   Secret: "abc123321"
   Expire: 24 # hour
-  Issuer: "gin-vue-blog"
+  Issuer: "xx-gym"
 Mysql:
   Host: "160.202.224.52"
   Port: "3306"

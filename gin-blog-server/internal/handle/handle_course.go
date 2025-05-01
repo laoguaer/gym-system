@@ -32,10 +32,6 @@ func (*Course) GetList(c *gin.Context) {
 		Page:  query.Page,
 	})
 }
-
-type MyCourseVo struct {
-	Courses []model.CourseVO `json:"courses"`
-}
 type UserCourseVo struct {
 	ID          int          `json:"id"`
 	Title       string       `json:"title"`
@@ -43,6 +39,7 @@ type UserCourseVo struct {
 	StartTime   time.Time    `json:"start_time"`
 	EndTime     time.Time    `json:"end_time"`
 	CoachID     int          `json:"coach_id"`
+	CoachName   string       `json:"coach_name"`
 	IsSingle    int          `json:"is_single"`
 	Coach       *model.Coach `json:"coach,omitempty"`
 	TagList     []string     `json:"tag_list,omitempty"`
@@ -81,7 +78,7 @@ func (*Course) GetUserCourseList(c *gin.Context) {
 			Description: course.Description,
 			StartTime:   course.StartTime,
 			EndTime:     course.EndTime,
-			CoachID:     course.CoachID,
+			CoachName:   course.CoachName,
 			IsSingle:    course.IsSingle,
 			TagList:     course.TagList,
 			Coach:       course.Coach,

@@ -116,6 +116,7 @@ onMounted(async () => {
 
   // 获取课程列表
   await fetchCourses()
+  // console.log(courseStore.courses)
 })
 </script>
 
@@ -123,7 +124,7 @@ onMounted(async () => {
   <main class="min-h-[100vh] flex flex-col px-4 py-6">
     <div class="mx-auto container">
       <!-- 页面标题 -->
-      <h1 class="mb-6 text-3xl text-gray-800 font-bold">
+      <h1 class="mb-6 mt-8 text-3xl text-gray-800 font-bold">
         课程信息
       </h1>
 
@@ -175,7 +176,6 @@ onMounted(async () => {
             <label class="mb-1 text-sm text-gray-600">标签</label>
             <select
               v-model="searchForm.tag_ids"
-              multiple
               class="border border-gray-300 rounded-md px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option v-for="tag in courseStore.tags" :key="tag.id" :value="tag.id">
@@ -244,7 +244,7 @@ onMounted(async () => {
             <div class="text-sm text-gray-500 space-y-1">
               <p class="flex justify-between">
                 <span>教练:</span>
-                <span class="text-gray-700 font-medium">{{ course.coach ? course.coach.name : '未分配' }}</span>
+                <span class="text-gray-700 font-medium">{{ course.coach_name !== "" ? course.coach_name : '未分配' }}</span>
               </p>
               <p class="flex justify-between">
                 <span>课程类型:</span>
