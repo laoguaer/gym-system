@@ -20,7 +20,7 @@ const router = useRouter()
 const { query } = useRoute()
 
 const loginForm = reactive({
-  username: 'guest',
+  username: 'admin',
   password: '123456',
 })
 
@@ -58,7 +58,12 @@ async function handleLogin() {
       await addDynamicRoutes()
 
       isRemember ? setLocal('loginInfo', { username, password }) : removeLocal('loginInfo')
-      $message.success('登录成功')
+      if (userStore.isAdmin) {
+        $message.success(`登录成功 管理员🎉 ${userStore.userInfo.id}`)
+      }
+      else {
+        $message.warning(`登录成功 教练🎉 ${userStore.userInfo.id}`)
+      }
 
       // 页面跳转: 根据 URL 中的 redirect 进行跳转
       if (query.redirect) {

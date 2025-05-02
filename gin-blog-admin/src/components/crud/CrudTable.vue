@@ -87,6 +87,7 @@ async function handleQuery() {
   catch (error) {
     tableData.value = []
     pagination.itemCount = 0
+    console.error(error)
   }
   finally {
     emit('dataChange', tableData.value)

@@ -188,6 +188,7 @@ func registerAdminHandler(r *gin.Engine) {
 	coach := auth.Group("/coach")
 	{
 		coach.GET("/list", coachAPI.GetList) // 教练列表
+		coach.POST("/add", coachAPI.AddCoach)
 	}
 	// 学员模块
 	student := auth.Group("/student")
@@ -197,7 +198,9 @@ func registerAdminHandler(r *gin.Engine) {
 	// 课程模块
 	course := auth.Group("/course")
 	{
-		course.GET("/list", courseAPI.GetList) // 课程列表
+		course.GET("/list", courseAPI.GetList)                   // 课程列表
+		course.POST("/addOrupdate", courseAPI.AddOrUpdateCourse) // 添加课程
+		course.DELETE("/delete", courseAPI.DeleteCourse)         // 添加课程
 	}
 	// 预约模块
 	booking := auth.Group("/booking")

@@ -1,5 +1,5 @@
 <script setup>
-import { h, onMounted, ref } from 'vue'
+import { computed, h, onMounted, ref } from 'vue'
 import { NButton, NForm, NFormItem, NInput, NInputNumber, NSelect, NSpace, NSwitch, NTag, NTimePicker } from 'naive-ui'
 
 import CommonPage from '@/components/common/CommonPage.vue'
@@ -10,9 +10,16 @@ import CrudTable from '@/components/crud/CrudTable.vue'
 import { formatDate } from '@/utils'
 import { useCRUD } from '@/composables'
 import api from '@/api'
+import { useUserStore } from '@/store'
 
 defineOptions({ name: '课程列表' })
 
+const userStore = useUserStore()
+const isAdmin = computed(() => {
+  console.log('用户ID:', userStore.userInfo.id)
+  console.log('是否管理员:', userStore.isAdmin)
+  return userStore.isAdmin
+})
 const $table = ref(null)
 const queryItems = ref({
   title: '',
@@ -26,12 +33,15 @@ const {
   modalLoading,
   handleSave,
   handleEdit,
+  handleAdd,
+  handleDelete,
   modalForm,
   modalFormRef,
 } = useCRUD({
   name: '课程',
-  doCreate: api.createCourse,
-  doUpdate: api.updateCourse,
+  doCreate: api.createOrUpdateCourse,
+  doUpdate: api.createOrUpdateCourse,
+  doDelete: api.deleteCourse,
   refresh: () => $table.value?.handleSearch(),
 })
 
@@ -180,6 +190,8 @@ const columns = [
     align: 'center',
     fixed: 'right',
     render(row) {
+      if (!isAdmin.value)
+        return null
       return [
         h(
           NButton,
@@ -212,23 +224,39 @@ const columns = [
 ]
 
 // 删除课程
-async function handleDelete(ids) {
-  if (!ids || ids.length === 0) {
-    return
-  }
-  try {
-    await api.deleteCourse(ids)
-    $message?.success('删除成功')
-    $table.value?.handleSearch()
-  }
-  catch (err) {
-    console.error(err)
-  }
-}
+// async function handleDelete(ids) {
+//   if (!ids || ids.length === 0) {
+//     return
+//   }
+//   try {
+//     await api.deleteCourse(ids)
+//     $message?.success('删除成功')
+//     $table.value?.handleSearch()
+//   }
+//   catch (err) {
+//     console.error(err)
+//   }
+// }
 </script>
 
 <template>
   <CommonPage title="课程列表">
+    <!-- 调试信息 -->
+    <!-- <div style="background-color: #f5f5f5; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
+      <p>当前用户ID: {{ userStore.userInfo.id }}</p>
+      <p>是否管理员: {{ userStore.isAdmin }}</p>
+      <p>计算属性isAdmin: {{ isAdmin }}</p>
+    </div> -->
+
+    <template #action>
+      <NButton v-if="isAdmin" type="primary" @click="handleAdd({})">
+        <template #icon>
+          <span class="i-material-symbols:add" />
+        </template>
+        新建课程
+      </NButton>
+    </template>
+
     <CrudTable
       ref="$table"
       v-model:query-items="queryItems"
@@ -265,15 +293,6 @@ async function handleDelete(ids) {
           />
         </QueryItem>
       </template>
-
-      <template #toolbar>
-        <NButton type="primary" @click="handleEdit({})">
-          <template #icon>
-            <i class="i-material-symbols:add" />
-          </template>
-          新增课程
-        </NButton>
-      </template>
     </CrudTable>
 
     <CrudModal
@@ -305,30 +324,36 @@ async function handleDelete(ids) {
         <NFormItem label="课程标签" path="tags">
           <NInput v-model:value="modalForm.tags" placeholder="请输入课程标签，多个标签用逗号分隔" />
         </NFormItem>
-        <NFormItem label="开始时间" path="start_time" rule="required">
+        <NFormItem label="开始时间" path="start_time" :rule="{ required: false }">
           <NTimePicker
             v-model:value="modalForm.start_time"
-            type="datetime"
             clearable
             placeholder="请选择开始时间"
+            format="yyyy-MM-dd HH:mm:ss"
+            :actions="['clear', 'now', 'confirm']"
+            :on-update:value="(v) => modalForm.start_time = v ? `${formatDate(v, 'YYYY-MM-DDTHH:mm:ss')}+08:00` : null"
           />
         </NFormItem>
-        <NFormItem label="结束时间" path="end_time" rule="required">
+        <NFormItem label="结束时间" path="end_time" :rule="{ required: false }">
           <NTimePicker
             v-model:value="modalForm.end_time"
-            type="datetime"
             clearable
             placeholder="请选择结束时间"
+            format="yyyy-MM-dd HH:mm:ss"
+            :actions="['clear', 'now', 'confirm']"
+            :on-update:value="(v) => modalForm.end_time = v ? `${formatDate(v, 'YYYY-MM-DDTHH:mm:ss')}+08:00` : null"
           />
         </NFormItem>
-        <NFormItem label="教练" path="coach_id" rule="required">
+        <NFormItem label="教练" path="coach_id" :rule="{ required: true, type: 'number', message: '请选择教练' }">
           <NSelect
             v-model:value="modalForm.coach_id"
+            clearable
             placeholder="请选择教练"
             :options="coachOptions"
+            @update:value="(value, option) => { modalForm.coach_id = value; modalForm.coach_name = option?.label || null; }"
           />
         </NFormItem>
-        <NFormItem label="最大容量" path="max_capacity" rule="required">
+        <NFormItem label="最大容量" path="max_capacity" :rule="{ required: true, type: 'number', message: '请输入最大容量', trigger: ['blur', 'input'] }">
           <NInputNumber
             v-model:value="modalForm.max_capacity"
             placeholder="请输入最大容量"
@@ -336,7 +361,7 @@ async function handleDelete(ids) {
             :precision="0"
           />
         </NFormItem>
-        <NFormItem label="课程类型" path="is_single" rule="required">
+        <NFormItem label="课程类型" path="is_single" :rule="{ required: true, type: 'number', message: '请输入课程类型', trigger: ['blur', 'input'] }">
           <NSelect
             v-model:value="modalForm.is_single"
             placeholder="请选择课程类型"

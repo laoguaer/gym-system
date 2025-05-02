@@ -23,9 +23,10 @@ type UserAuth struct {
 	IsDisable     bool       `json:"is_disable"`
 	IsSuper       bool       `json:"is_super"` // 超级管理员只能后台设置
 
-	UserInfoId int       `json:"user_info_id"`
-	UserInfo   *UserInfo `json:"info"`
-	Roles      []*Role   `json:"roles" gorm:"many2many:user_auth_role"`
+	UserInfoId  int       `json:"user_info_id"`
+	UserInfo    *UserInfo `json:"info"`
+	CoachInfoId int       `json:"coach_info_id"`
+	Roles       []*Role   `json:"roles" gorm:"many2many:user_auth_role"`
 }
 
 func (u *UserAuth) MarshalBinary() (data []byte, err error) {

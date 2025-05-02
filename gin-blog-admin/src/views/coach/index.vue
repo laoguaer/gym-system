@@ -21,13 +21,19 @@ const queryItems = ref({
 
 const {
   modalVisible,
+  // modalAction,
+  // modalTitle,
   modalLoading,
-  handleSave,
+  handleAdd,
+  // handleDelete,
   handleEdit,
+  handleSave,
   modalForm,
   modalFormRef,
 } = useCRUD({
-  name: '教练',
+  name: '角色',
+  initForm: {},
+  doCreate: api.createCoach,
   doUpdate: api.updateCoach,
   refresh: () => $table.value?.handleSearch(),
 })
@@ -60,15 +66,6 @@ const columns = [
     width: 60,
     align: 'center',
     ellipsis: { tooltip: true },
-  },
-  {
-    title: '性别',
-    key: 'gender',
-    width: 40,
-    align: 'center',
-    render(row) {
-      return h('span', row.gender === 1 ? '男' : '女')
-    },
   },
   {
     title: '电话',
@@ -174,6 +171,15 @@ async function handleUpdateDisable(row) {
 
 <template>
   <CommonPage title="教练列表">
+    <template #action>
+      <NButton type="primary" @click="handleAdd({})">
+        <template #icon>
+          <span class="i-material-symbols:add" />
+        </template>
+        新建教练
+      </NButton>
+    </template>
+
     <CrudTable
       ref="$table"
       v-model:query-items="queryItems"
@@ -209,6 +215,9 @@ async function handleUpdateDisable(row) {
         <NFormItem label="电话" path="phone">
           <NInput v-model:value="modalForm.phone" />
         </NFormItem>
+        <NFormItem label="密码" path="password">
+          <NInput v-model:value="modalForm.password" />
+        </NFormItem>
         <NFormItem label="头像" path="avatar">
           <NInput v-model:value="modalForm.avatar" />
         </NFormItem>
@@ -218,9 +227,6 @@ async function handleUpdateDisable(row) {
             type="textarea"
             placeholder="请输入描述信息"
           />
-        </NFormItem>
-        <NFormItem label="加入时间" path="join_time">
-          <NInput v-model:value="modalForm.join_time" disabled />
         </NFormItem>
       </NForm>
     </CrudModal>

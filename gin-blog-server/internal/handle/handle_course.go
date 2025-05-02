@@ -3,6 +3,7 @@ package handle
 import (
 	g "gin-blog/internal/global"
 	"gin-blog/internal/model"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -32,6 +33,7 @@ func (*Course) GetList(c *gin.Context) {
 		Page:  query.Page,
 	})
 }
+
 type UserCourseVo struct {
 	ID          int          `json:"id"`
 	Title       string       `json:"title"`
@@ -140,6 +142,96 @@ func (*Course) BuyCourse(c *gin.Context) {
 		return nil
 	}); err != nil {
 		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
+	ReturnSuccess(c, nil)
+}
+
+type AddOrUpdateCourseBody struct {
+	ID          int       `json:"id"`
+	Title       string    `json:"title" binding:"required"`
+	Description string    `json:"description" binding:"required"`
+	StartTime   time.Time `json:"start_time" binding:"required"`
+	EndTime     time.Time `json:"end_time" binding:"required"`
+	CoachID     int       `json:"coach_id" binding:"required,min=1"`
+	CoachName   string    `json:"coach_name" binding:"required"`
+	MaxCapacity int       `json:"max_capacity"`
+	IsSingle    int       `json:"is_single"`
+}
+
+// AddCourse 添加课程
+func (*Course) AddOrUpdateCourse(c *gin.Context) {
+	var body AddOrUpdateCourseBody
+	if err := c.ShouldBindJSON(&body); err != nil {
+		ReturnError(c, g.ErrRequest, err)
+		return
+	}
+
+	// 记录请求信息
+	zap.L().Debug("add course body", zap.Any("body", body))
+
+	// 对于私教课，不需要设置最大上课容量
+	if body.IsSingle == 1 {
+		// 私教课默认容量为1
+		body.MaxCapacity = 1
+	} else if body.MaxCapacity <= 0 {
+		// 团体课必须设置最大上课容量
+		ReturnError(c, g.ErrRequest, nil)
+		return
+	}
+
+	// 创建课程对象
+	course := &model.Course{
+		Title:       body.Title,
+		Description: body.Description,
+		Tags:        "",
+		StartTime:   body.StartTime,
+		EndTime:     body.EndTime,
+		CoachID:     body.CoachID,
+		CoachName:   body.CoachName,
+		MaxCapacity: body.MaxCapacity,
+		IsSingle:    body.IsSingle,
+	}
+
+	// 保存到数据库
+	db := GetDB(c)
+	if body.ID != 0 {
+		// 更新课程
+		course.ID = body.ID
+		err := model.UpdateCourse(db, course)
+		if err != nil {
+			ReturnError(c, g.ErrDbOp, err)
+			return
+		}
+	} else {
+		// 创建课程
+		err := model.CreateCourse(db, course)
+		if err != nil {
+			ReturnError(c, g.ErrDbOp, err)
+			return
+		}
+	}
+
+	ReturnSuccess(c, nil)
+}
+
+// DeleteCourse 删除课程
+// 请求参数：[6]
+func (*Course) DeleteCourse(c *gin.Context) {
+	bodyBytes, _ := c.GetRawData()
+	idStr := string(bodyBytes)
+	// 去除首尾的中括号
+	idStr = idStr[1 : len(idStr)-1]
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id < 1 {
+		c.JSON(400, gin.H{"error": "无效ID"})
+		return
+	}
+	// 从数据库中删除课程
+	db := GetDB(c)
+	err = model.DeleteCourse(db, id)
+	if err != nil {
+		ReturnSuccess(c, nil)
 		return
 	}
 	ReturnSuccess(c, nil)

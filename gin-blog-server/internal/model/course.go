@@ -17,7 +17,7 @@ type Course struct {
 	CoachID     int       `json:"coach_id" gorm:"not null"`
 	CoachName   string    `json:"coach_namegorm:type:varchar(255);not null"`
 	MaxCapacity int       `json:"max_capacity" gorm:"not null;default:30"`
-	IsSingle    int       `json:"is_single" gorm:"type:bit(1);not null"`
+	IsSingle    int       `json:"is_single" gorm:"type:int;not null;default:0"`
 
 	// // 关联教练信息
 	// Coach *Coach `json:"coach,omitempty" gorm:"foreignKey:CoachID"`
@@ -42,11 +42,11 @@ type CourseVO struct {
 	StartTime   time.Time `json:"start_time"`
 	EndTime     time.Time `json:"end_time"`
 	CoachID     int       `json:"coach_id"`
-	CoachName   string   `json:"coach_name"`
-	MaxCapacity int      `json:"max_capacity"`
-	IsSingle    int      `json:"is_single"`
-	Coach       *Coach   `json:"coach,omitempty"`
-	TagList     []string `json:"tag_list,omitempty"`
+	CoachName   string    `json:"coach_name"`
+	MaxCapacity int       `json:"max_capacity"`
+	IsSingle    int       `json:"is_single"`
+	Coach       *Coach    `json:"coach,omitempty"`
+	TagList     []string  `json:"tag_list,omitempty"`
 }
 
 // GetCourseList 获取课程列表
@@ -96,6 +96,7 @@ func GetCourseList(db *gorm.DB, page, size int, title string, coachID int, tagID
 			StartTime:   course.StartTime,
 			EndTime:     course.EndTime,
 			CoachName:   course.CoachName,
+			CoachID:     course.CoachID,
 			MaxCapacity: course.MaxCapacity,
 			IsSingle:    course.IsSingle, // 将uint8转换为bool
 		}
@@ -145,14 +146,17 @@ func GetCourseById(db *gorm.DB, id int) (*CourseVO, error) {
 }
 
 // CreateCourse 创建课程
-func CreateCourse(db *gorm.DB, course *Course) (*Course, error) {
-	result := db.Create(course)
-	return course, result.Error
+func CreateCourse(db *gorm.DB, course *Course) error {
+	result := db.Debug().Create(course)
+	return result.Error
 }
 
 // UpdateCourse 更新课程信息
 func UpdateCourse(db *gorm.DB, course *Course) error {
-	result := db.Model(&Course{}).Where("id = ?", course.ID).Updates(course)
+	result := db.Debug().Model(&Course{}).
+		Where("id = ?", course.ID).
+		Select("*"). // 强制更新所有字段，包括零值
+		Updates(course)
 	return result.Error
 }
 

@@ -1,13 +1,16 @@
 package handle
 
 import (
+	"errors"
 	"fmt"
 	g "gin-blog/internal/global"
 	"gin-blog/internal/model"
+	"gin-blog/internal/utils"
 	"sort"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // Coach 教练模块处理函数
@@ -189,4 +192,106 @@ func (*Coach) GetCoachWithUserIds(c *gin.Context) {
 	}
 
 	ReturnSuccess(c, coachVOList)
+}
+
+type AddCoachReq struct {
+	Phone    string `form:"phone" binding:"required"`
+	Name     string `form:"name" binding:"required"`
+	Desc     string `form:"desc" binding:"required"`
+	Avatar   string `form:"avatar"`
+	Password string `form:"password" binding:"required"`
+}
+
+func (*Coach) AddCoach(c *gin.Context) {
+	var req AddCoachReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		ReturnError(c, g.ErrRequest, err)
+		return
+	}
+	if req.Phone == "" {
+		ReturnError(c, g.ErrRequest, fmt.Errorf("phone is empty"))
+		return
+	}
+	if req.Name == "" {
+		ReturnError(c, g.ErrRequest, fmt.Errorf("name is empty"))
+		return
+	}
+	db := GetDB(c)
+	// 检查教练账号是否存在，避免重复注册
+	auth, err := model.GetUserAuthInfoByName(db, req.Phone)
+	if err != nil {
+		var flag bool = false
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			flag = true
+		}
+		if !flag {
+			ReturnError(c, g.ErrDbOp, err)
+			return
+		}
+	}
+	if auth != nil {
+		ReturnError(c, g.ErrUserExist, err)
+		return
+	}
+
+	// 开启事务
+	tx := db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// 注册教练账号
+	coachInfo := &model.Coach{
+		Phone:  req.Phone,
+		Name:   req.Name,
+		Desc:   req.Desc,
+		Avatar: req.Avatar,
+	}
+	if req.Avatar == "" {
+		coachInfo.Avatar = "https://randomuser.me/api/portraits/men/38.jpg"
+	}
+	// 创建教练信息并获取插入后的ID
+	if err := tx.Create(&coachInfo).Error; err != nil {
+		tx.Rollback()
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
+	coachInfoId := coachInfo.ID
+
+	// 创建userauth
+	pass, _ := utils.BcryptHash(req.Password)
+	userauth := &model.UserAuth{
+		Username:    req.Phone,
+		Password:    pass,
+		CoachInfoId: coachInfoId,
+		UserInfoId:  2,
+	}
+
+	if err = tx.Create(&userauth).Error; err != nil {
+		tx.Rollback()
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
+
+	// 创建role关联表
+	user_role := &model.UserAuthRole{
+		UserAuthId: userauth.ID,
+		RoleId:     4, // 默认身份为教练
+	}
+	if err = tx.Create(&user_role).Error; err != nil {
+		tx.Rollback()
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
+
+	// 提交事务
+	if err = tx.Commit().Error; err != nil {
+		tx.Rollback()
+		ReturnError(c, g.ErrDbOp, err)
+		return
+	}
+
+	ReturnSuccess(c, nil)
 }

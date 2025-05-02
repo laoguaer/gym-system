@@ -70,3 +70,4 @@ func GetCoachForAi(db *gorm.DB, coachName string) ([]Coach, error) {
 	err := db.Model(&Coach{}).Select("name, desc, occupation").Where("name LIKE?", "%"+coachName+"%").Find(&res).Error
 	return res, err
 }
+

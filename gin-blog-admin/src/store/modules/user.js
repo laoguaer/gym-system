@@ -13,6 +13,10 @@ export const useUserStore = defineStore('user', {
       website: '',
       // roles: [], // TODO: 后端返回 roles
     },
+    coachInfo: {
+      id: null,
+      name: '',
+    },
   }),
   getters: {
     userId: state => state.userInfo.id,
@@ -21,6 +25,7 @@ export const useUserStore = defineStore('user', {
     website: state => state.userInfo.website,
     avatar: state => convertImgUrl(state.userInfo.avatar),
     // roles: state => state.userInfo.roles,
+    isAdmin: state => state.userInfo.id === 2,
   },
   actions: {
     async getUserInfo() {
